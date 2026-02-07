@@ -1,0 +1,479 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		00000001 /* AilertApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000001; };
+		00000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000002; };
+		00000003 /* Incident.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000003; };
+		00000004 /* MediaCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000004; };
+		00000005 /* TrustedContact.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000005; };
+		00000006 /* EmergencyProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000006; };
+		00000007 /* SensorData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000007; };
+		00000008 /* IncidentSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000008; };
+		00000009 /* SettingsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000009; };
+		00000010 /* SensorFusionEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000010; };
+		00000011 /* EscalationEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000011; };
+		00000012 /* VideoRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000012; };
+		00000013 /* IncidentReportGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000013; };
+		00000014 /* IncidentStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000014; };
+		00000015 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000015; };
+		00000016 /* SOSButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000016; };
+		00000017 /* ActiveIncidentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000017; };
+		00000018 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000018; };
+		00000019 /* IncidentHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000019; };
+		00000020 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000020; };
+		00000021 /* DuressDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000021; };
+		00000022 /* AuditLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000022; };
+		00000023 /* PrivacyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000023; };
+		00000024 /* ShakeDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000024; };
+		00000025 /* VolumeButtonTrigger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000025; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		10000001 /* AilertApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AilertApp.swift; sourceTree = "<group>"; };
+		10000002 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		10000003 /* Incident.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Incident.swift; sourceTree = "<group>"; };
+		10000004 /* MediaCapture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaCapture.swift; sourceTree = "<group>"; };
+		10000005 /* TrustedContact.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrustedContact.swift; sourceTree = "<group>"; };
+		10000006 /* EmergencyProfile.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmergencyProfile.swift; sourceTree = "<group>"; };
+		10000007 /* SensorData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensorData.swift; sourceTree = "<group>"; };
+		10000008 /* IncidentSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncidentSessionManager.swift; sourceTree = "<group>"; };
+		10000009 /* SettingsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsManager.swift; sourceTree = "<group>"; };
+		10000010 /* SensorFusionEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SensorFusionEngine.swift; sourceTree = "<group>"; };
+		10000011 /* EscalationEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EscalationEngine.swift; sourceTree = "<group>"; };
+		10000012 /* VideoRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoRecorder.swift; sourceTree = "<group>"; };
+		10000013 /* IncidentReportGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncidentReportGenerator.swift; sourceTree = "<group>"; };
+		10000014 /* IncidentStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncidentStore.swift; sourceTree = "<group>"; };
+		10000015 /* MainView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainView.swift; sourceTree = "<group>"; };
+		10000016 /* SOSButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SOSButtonView.swift; sourceTree = "<group>"; };
+		10000017 /* ActiveIncidentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ActiveIncidentView.swift; sourceTree = "<group>"; };
+		10000018 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		10000019 /* IncidentHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncidentHistoryView.swift; sourceTree = "<group>"; };
+		10000020 /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
+		10000021 /* DuressDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuressDetector.swift; sourceTree = "<group>"; };
+		10000022 /* AuditLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuditLogger.swift; sourceTree = "<group>"; };
+		10000023 /* PrivacyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyManager.swift; sourceTree = "<group>"; };
+		10000024 /* ShakeDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShakeDetector.swift; sourceTree = "<group>"; };
+		10000025 /* VolumeButtonTrigger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VolumeButtonTrigger.swift; sourceTree = "<group>"; };
+		10000099 /* Ailert.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Ailert.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		10000100 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		20000001 = {
+			isa = PBXGroup;
+			children = (
+				20000002 /* Ailert */,
+				20000099 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		20000002 /* Ailert */ = {
+			isa = PBXGroup;
+			children = (
+				10000001 /* AilertApp.swift */,
+				10000002 /* ContentView.swift */,
+				20000003 /* Models */,
+				20000004 /* Services */,
+				20000005 /* Views */,
+				20000006 /* Triggers */,
+				20000007 /* Safety */,
+				20000008 /* Resources */,
+			);
+			path = Ailert;
+			sourceTree = "<group>";
+		};
+		20000003 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				10000003 /* Incident.swift */,
+				10000004 /* MediaCapture.swift */,
+				10000005 /* TrustedContact.swift */,
+				10000006 /* EmergencyProfile.swift */,
+				10000007 /* SensorData.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		20000004 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				10000008 /* IncidentSessionManager.swift */,
+				10000009 /* SettingsManager.swift */,
+				10000010 /* SensorFusionEngine.swift */,
+				10000011 /* EscalationEngine.swift */,
+				10000012 /* VideoRecorder.swift */,
+				10000013 /* IncidentReportGenerator.swift */,
+				10000014 /* IncidentStore.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		20000005 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				10000015 /* MainView.swift */,
+				10000016 /* SOSButtonView.swift */,
+				10000017 /* ActiveIncidentView.swift */,
+				10000018 /* SettingsView.swift */,
+				10000019 /* IncidentHistoryView.swift */,
+				10000020 /* OnboardingView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		20000006 /* Triggers */ = {
+			isa = PBXGroup;
+			children = (
+				10000024 /* ShakeDetector.swift */,
+				10000025 /* VolumeButtonTrigger.swift */,
+			);
+			path = Triggers;
+			sourceTree = "<group>";
+		};
+		20000007 /* Safety */ = {
+			isa = PBXGroup;
+			children = (
+				10000021 /* DuressDetector.swift */,
+				10000022 /* AuditLogger.swift */,
+				10000023 /* PrivacyManager.swift */,
+			);
+			path = Safety;
+			sourceTree = "<group>";
+		};
+		20000008 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				10000100 /* Info.plist */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		20000099 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				10000099 /* Ailert.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		30000001 /* Ailert */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 40000001 /* Build configuration list for PBXNativeTarget "Ailert" */;
+			buildPhases = (
+				30000002 /* Sources */,
+				30000003 /* Frameworks */,
+				30000004 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Ailert;
+			productName = Ailert;
+			productReference = 10000099 /* Ailert.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		50000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					30000001 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+				};
+			};
+			buildConfigurationList = 40000002 /* Build configuration list for PBXProject "Ailert" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 20000001;
+			productRefGroup = 20000099 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				30000001 /* Ailert */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		30000002 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				00000001 /* AilertApp.swift in Sources */,
+				00000002 /* ContentView.swift in Sources */,
+				00000003 /* Incident.swift in Sources */,
+				00000004 /* MediaCapture.swift in Sources */,
+				00000005 /* TrustedContact.swift in Sources */,
+				00000006 /* EmergencyProfile.swift in Sources */,
+				00000007 /* SensorData.swift in Sources */,
+				00000008 /* IncidentSessionManager.swift in Sources */,
+				00000009 /* SettingsManager.swift in Sources */,
+				00000010 /* SensorFusionEngine.swift in Sources */,
+				00000011 /* EscalationEngine.swift in Sources */,
+				00000012 /* VideoRecorder.swift in Sources */,
+				00000013 /* IncidentReportGenerator.swift in Sources */,
+				00000014 /* IncidentStore.swift in Sources */,
+				00000015 /* MainView.swift in Sources */,
+				00000016 /* SOSButtonView.swift in Sources */,
+				00000017 /* ActiveIncidentView.swift in Sources */,
+				00000018 /* SettingsView.swift in Sources */,
+				00000019 /* IncidentHistoryView.swift in Sources */,
+				00000020 /* OnboardingView.swift in Sources */,
+				00000021 /* DuressDetector.swift in Sources */,
+				00000022 /* AuditLogger.swift in Sources */,
+				00000023 /* PrivacyManager.swift in Sources */,
+				00000024 /* ShakeDetector.swift in Sources */,
+				00000025 /* VolumeButtonTrigger.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		30000003 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXResourcesBuildPhase section */
+		30000004 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		60000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		60000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		60000003 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Ailert/Resources/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Ailert;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ailert.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		60000004 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Ailert/Resources/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Ailert;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.ailert.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		40000001 /* Build configuration list for PBXNativeTarget "Ailert" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				60000003 /* Debug */,
+				60000004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		40000002 /* Build configuration list for PBXProject "Ailert" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				60000001 /* Debug */,
+				60000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 50000001 /* Project object */;
+}

@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>CFBundleDevelopmentRegion</key>
+    <string>$(DEVELOPMENT_LANGUAGE)</string>
+    <key>CFBundleDisplayName</key>
+    <string>Ailert</string>
+    <key>CFBundleExecutable</key>
+    <string>$(EXECUTABLE_NAME)</string>
+    <key>CFBundleIdentifier</key>
+    <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+    <key>CFBundleInfoDictionaryVersion</key>
+    <string>6.0</string>
+    <key>CFBundleName</key>
+    <string>$(PRODUCT_NAME)</string>
+    <key>CFBundlePackageType</key>
+    <string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
+    <key>CFBundleShortVersionString</key>
+    <string>1.0</string>
+    <key>CFBundleVersion</key>
+    <string>1</string>
+    <key>LSRequiresIPhoneOS</key>
+    <true/>
+    <key>UIApplicationSceneManifest</key>
+    <dict>
+        <key>UIApplicationSupportsMultipleScenes</key>
+        <false/>
+    </dict>
+    <key>UILaunchScreen</key>
+    <dict>
+        <key>UIColorName</key>
+        <string>LaunchScreenBackground</string>
+        <key>UIImageName</key>
+        <string>LaunchImage</string>
+    </dict>
+    <key>UIRequiredDeviceCapabilities</key>
+    <array>
+        <string>armv7</string>
+        <string>accelerometer</string>
+        <string>gyroscope</string>
+        <string>location-services</string>
+        <string>gps</string>
+        <string>microphone</string>
+    </array>
+    <key>UISupportedInterfaceOrientations</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+        <string>UIInterfaceOrientationLandscapeLeft</string>
+        <string>UIInterfaceOrientationLandscapeRight</string>
+    </array>
+    <key>UIBackgroundModes</key>
+    <array>
+        <string>audio</string>
+        <string>location</string>
+        <string>processing</string>
+    </array>
+    
+    <!-- Privacy Permissions -->
+    <key>NSLocationWhenInUseUsageDescription</key>
+    <string>Ailert needs your location to share it with emergency responders and trusted contacts when you activate an emergency.</string>
+    <key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+    <string>Ailert needs continuous location access to track your position during an emergency and share it with responders.</string>
+    <key>NSLocationAlwaysUsageDescription</key>
+    <string>Ailert needs background location access to continue tracking during emergencies even when the app is in the background.</string>
+    <key>NSCameraUsageDescription</key>
+    <string>Ailert uses the camera to record video evidence during emergencies that can be shared with authorities.</string>
+    <key>NSMicrophoneUsageDescription</key>
+    <string>Ailert uses the microphone to record audio during emergencies and detect distress sounds.</string>
+    <key>NSMotionUsageDescription</key>
+    <string>Ailert uses motion sensors to detect falls, impacts, and sudden movements that may indicate an emergency.</string>
+    <key>NSFallDetectionUsageDescription</key>
+    <string>Ailert uses fall detection to automatically identify when you may have fallen and need help.</string>
+    <key>NSHealthShareUsageDescription</key>
+    <string>Ailert can access your health information to share critical medical data with emergency responders.</string>
+    <key>NSHealthUpdateUsageDescription</key>
+    <string>Ailert may record health data during emergency events.</string>
+    <key>NSContactsUsageDescription</key>
+    <string>Ailert needs access to your contacts to set up trusted emergency contacts.</string>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>Ailert saves captured photos and videos from emergencies to your photo library.</string>
+    
+    <!-- App Transport Security -->
+    <key>NSAppTransportSecurity</key>
+    <dict>
+        <key>NSAllowsArbitraryLoads</key>
+        <false/>
+    </dict>
+</dict>
+</plist>
