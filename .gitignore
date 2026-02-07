@@ -23,6 +23,7 @@ DerivedData
 # Xcode - Build generated
 build/
 DerivedData/
+.derived/
 
 # Swift Package Manager
 .build/

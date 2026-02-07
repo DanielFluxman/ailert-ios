@@ -55,6 +55,7 @@ class IncidentSessionManager: ObservableObject {
         
         currentIncident = incident
         hasActiveIncident = true
+        currentClassification = incident.classification
         
         // Start timers
         startSessionTimer()
@@ -65,6 +66,19 @@ class IncidentSessionManager: ObservableObject {
         
         // Log audit event
         auditLogger.log(event: .sessionStarted, incidentId: incident.id)
+    }
+    
+    func updateClassification(_ classification: EmergencyClassification) {
+        guard var incident = currentIncident else { return }
+        incident.classification = classification
+        currentClassification = classification
+        
+        let event = IncidentEvent(
+            type: .classificationUpdated,
+            description: "Classification changed to \(classification.displayName)"
+        )
+        incident.events.append(event)
+        currentIncident = incident
     }
     
     func cancelSession(pin: String? = nil) {

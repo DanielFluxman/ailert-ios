@@ -183,21 +183,19 @@ struct IncidentDetailView: View {
                     .cornerRadius(12)
                 }
                 
-                // Media
+                // Media Gallery
                 if !incident.mediaCaptures.isEmpty {
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("Media Captured")
-                            .font(.headline)
-                        
-                        let videos = incident.mediaCaptures.filter { $0.type == .video }
-                        let photos = incident.mediaCaptures.filter { $0.type == .photo }
-                        
-                        if !videos.isEmpty {
-                            Text("📹 \(videos.count) video(s)")
+                        HStack {
+                            Text("Media Captured")
+                                .font(.headline)
+                            Spacer()
+                            Text("\(incident.mediaCaptures.count) item(s)")
+                                .font(.caption)
+                                .foregroundColor(.secondary)
                         }
-                        if !photos.isEmpty {
-                            Text("📷 \(photos.count) photo(s)")
-                        }
+                        
+                        MediaThumbnailGrid(mediaCaptures: incident.mediaCaptures)
                     }
                     .padding()
                     .frame(maxWidth: .infinity, alignment: .leading)

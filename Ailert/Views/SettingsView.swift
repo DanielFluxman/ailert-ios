@@ -357,10 +357,32 @@ struct ContactEditor: View {
     @State private var relationship = ""
     @State private var notifySMS = true
     @State private var notifyCall = false
+    @State private var showContactPicker = false
     
     var body: some View {
         NavigationStack {
             Form {
+                // Import from Contacts button (only for new contacts)
+                if contact == nil {
+                    Section {
+                        Button {
+                            showContactPicker = true
+                        } label: {
+                            HStack {
+                                Image(systemName: "person.crop.circle.badge.plus")
+                                    .foregroundColor(.blue)
+                                Text("Import from Contacts")
+                                Spacer()
+                                Image(systemName: "chevron.right")
+                                    .foregroundColor(.secondary)
+                                    .font(.caption)
+                            }
+                        }
+                    } footer: {
+                        Text("Select a contact from your phone to auto-fill")
+                    }
+                }
+                
                 Section {
                     TextField("Name", text: $name)
                     TextField("Phone", text: $phone)
@@ -396,6 +418,12 @@ struct ContactEditor: View {
                     relationship = contact.relationship
                     notifySMS = contact.notifyVia.contains(.sms)
                     notifyCall = contact.notifyVia.contains(.call)
+                }
+            }
+            .sheet(isPresented: $showContactPicker) {
+                ContactPickerView { selectedName, selectedPhone in
+                    name = selectedName
+                    phone = selectedPhone
                 }
             }
         }

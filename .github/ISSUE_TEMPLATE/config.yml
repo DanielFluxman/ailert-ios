@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Security vulnerability reporting
+    url: mailto:dan@830shop.com
+    about: Do not file public security issues. Use SECURITY.md instructions.

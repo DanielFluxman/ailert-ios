@@ -11,8 +11,8 @@
 ### 🆘 One-Button Activation
 - Large, accessible SOS button with hold-to-activate
 - Discrete triggers: shake gesture, volume button combo
-- Home screen widget for instant access
-- Apple Watch support for wrist-based triggers
+- Planned: Home screen widget for instant access
+- Planned: Apple Watch support for wrist-based triggers
 
 ### 🧠 On-Device AI + Sensor Fusion
 - **Motion Analysis**: Fall detection, impact detection, sudden stops
@@ -79,8 +79,7 @@ Ailert/
 ├── Services/         # Core logic (Session, Sensor, Escalation)
 ├── Views/            # SwiftUI views
 ├── Triggers/         # Discrete activation methods
-├── Safety/           # Duress detection, privacy, audit
-└── Widgets/          # Home screen widget
+└── Safety/           # Duress detection, privacy, audit
 ```
 
 ### Key Components

@@ -1,0 +1,43 @@
+name: Feature request
+description: Propose an improvement for Ailert.
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem to solve
+      description: What user problem does this address?
+      placeholder: Describe the current limitation.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: Describe your preferred solution.
+      placeholder: Explain what you want to happen.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Any other approaches you considered.
+  - type: dropdown
+    id: privacy_impact
+    attributes:
+      label: Privacy impact
+      description: Does this change user data collection or sharing?
+      options:
+        - None
+        - Low
+        - Moderate
+        - High
+    validations:
+      required: true
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: Additional context
+      description: Mockups, references, or implementation notes.

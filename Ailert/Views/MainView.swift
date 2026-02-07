@@ -7,7 +7,6 @@ struct MainView: View {
     @EnvironmentObject var incidentManager: IncidentSessionManager
     @State private var showSettings = false
     @State private var showHistory = false
-    @State private var showEmergencyTypeSelector = false
     
     var body: some View {
         NavigationStack {
@@ -29,12 +28,12 @@ struct MainView: View {
                     // Status indicator
                     StatusIndicator()
                     
-                    // Main SOS Button
+                    // Main SOS Button - starts session immediately
                     SOSButtonView {
-                        showEmergencyTypeSelector = true
+                        incidentManager.startSession(classification: .unknown)
                     }
                     
-                    // Quick actions
+                    // Quick actions for pre-classified emergencies
                     HStack(spacing: 30) {
                         QuickActionButton(
                             icon: "heart.fill",
@@ -102,21 +101,6 @@ struct MainView: View {
             }
             .sheet(isPresented: $showHistory) {
                 IncidentHistoryView()
-            }
-            .confirmationDialog("Select Emergency Type", isPresented: $showEmergencyTypeSelector) {
-                Button("Medical Emergency") {
-                    incidentManager.startSession(classification: .medical)
-                }
-                Button("Accident") {
-                    incidentManager.startSession(classification: .accident)
-                }
-                Button("Personal Safety") {
-                    incidentManager.startSession(classification: .safety)
-                }
-                Button("I'm Not Sure") {
-                    incidentManager.startSession(classification: .unknown)
-                }
-                Button("Cancel", role: .cancel) {}
             }
         }
     }

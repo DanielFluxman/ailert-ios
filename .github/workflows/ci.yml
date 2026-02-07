@@ -1,0 +1,24 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate package manifest
+        run: swift package describe
+
+      - name: Run package tests
+        run: swift test
+
+      - name: Build iOS app (unsigned)
+        run: xcodebuild -project Ailert.xcodeproj -scheme Ailert -sdk iphonesimulator -configuration Debug CODE_SIGNING_ALLOWED=NO build

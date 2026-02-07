@@ -8,6 +8,7 @@ struct ActiveIncidentView: View {
     @State private var showCancelSheet = false
     @State private var enteredPIN = ""
     @State private var showCamera = false
+    @State private var showClassificationPicker = false
     
     var body: some View {
         ZStack {
@@ -31,10 +32,24 @@ struct ActiveIncidentView: View {
                         .tracking(2)
                         .foregroundColor(.white.opacity(0.8))
                     
-                    Text(incidentManager.currentClassification.displayName)
+                    // Tappable classification - tap to change
+                    Button {
+                        showClassificationPicker = true
+                    } label: {
+                        HStack(spacing: 8) {
+                            Image(systemName: incidentManager.currentClassification.icon)
+                            Text(incidentManager.currentClassification.displayName)
+                            Image(systemName: "chevron.down")
+                                .font(.caption)
+                        }
                         .font(.title)
                         .fontWeight(.heavy)
                         .foregroundColor(.white)
+                        .padding(.horizontal, 16)
+                        .padding(.vertical, 8)
+                        .background(Color.white.opacity(0.2))
+                        .cornerRadius(12)
+                    }
                     
                     // Timer
                     Text(formatTime(incidentManager.elapsedTime))
@@ -99,6 +114,14 @@ struct ActiveIncidentView: View {
                 incidentManager.cancelSession(pin: pin)
             }
             .presentationDetents([.medium])
+        }
+        .confirmationDialog("Change Emergency Type", isPresented: $showClassificationPicker) {
+            ForEach(EmergencyClassification.allCases, id: \.self) { classification in
+                Button(classification.displayName) {
+                    incidentManager.updateClassification(classification)
+                }
+            }
+            Button("Cancel", role: .cancel) {}
         }
     }
     

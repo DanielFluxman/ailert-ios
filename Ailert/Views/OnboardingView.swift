@@ -2,6 +2,9 @@
 // First-launch setup flow
 
 import SwiftUI
+import CoreLocation
+import AVFoundation
+import UserNotifications
 
 struct OnboardingView: View {
     @Binding var hasCompletedOnboarding: Bool
@@ -78,7 +81,7 @@ struct WelcomePage: View {
 // MARK: - Permissions Page
 
 struct PermissionsPage: View {
-    @State private var locationGranted = false
+    @StateObject private var locationManager = LocationPermissionManager()
     @State private var cameraGranted = false
     @State private var microphoneGranted = false
     @State private var notificationsGranted = false
@@ -102,9 +105,9 @@ struct PermissionsPage: View {
                     icon: "location.fill",
                     title: "Location",
                     description: "Share your location with responders",
-                    isGranted: $locationGranted
+                    isGranted: .constant(locationManager.isAuthorized)
                 ) {
-                    requestLocation()
+                    locationManager.requestPermission()
                 }
                 
                 PermissionRow(
@@ -139,26 +142,84 @@ struct PermissionsPage: View {
             Spacer()
         }
         .padding()
+        .onAppear {
+            checkCurrentPermissions()
+        }
     }
     
-    private func requestLocation() {
-        // Would trigger location permission request
-        locationGranted = true
+    private func checkCurrentPermissions() {
+        // Check camera
+        switch AVCaptureDevice.authorizationStatus(for: .video) {
+        case .authorized: cameraGranted = true
+        default: cameraGranted = false
+        }
+        
+        // Check microphone
+        switch AVCaptureDevice.authorizationStatus(for: .audio) {
+        case .authorized: microphoneGranted = true
+        default: microphoneGranted = false
+        }
+        
+        // Check notifications
+        UNUserNotificationCenter.current().getNotificationSettings { settings in
+            DispatchQueue.main.async {
+                notificationsGranted = settings.authorizationStatus == .authorized
+            }
+        }
     }
     
     private func requestCamera() {
-        // Would trigger camera permission request
-        cameraGranted = true
+        AVCaptureDevice.requestAccess(for: .video) { granted in
+            DispatchQueue.main.async {
+                cameraGranted = granted
+            }
+        }
     }
     
     private func requestMicrophone() {
-        // Would trigger microphone permission request
-        microphoneGranted = true
+        AVCaptureDevice.requestAccess(for: .audio) { granted in
+            DispatchQueue.main.async {
+                microphoneGranted = granted
+            }
+        }
     }
     
     private func requestNotifications() {
-        // Would trigger notification permission request
-        notificationsGranted = true
+        UNUserNotificationCenter.current().requestAuthorization(options: [.alert, .badge, .sound, .criticalAlert]) { granted, _ in
+            DispatchQueue.main.async {
+                notificationsGranted = granted
+            }
+        }
+    }
+}
+
+// MARK: - Location Permission Manager
+
+class LocationPermissionManager: NSObject, ObservableObject, CLLocationManagerDelegate {
+    private let manager = CLLocationManager()
+    @Published var isAuthorized = false
+    
+    override init() {
+        super.init()
+        manager.delegate = self
+        checkStatus()
+    }
+    
+    func requestPermission() {
+        manager.requestAlwaysAuthorization()
+    }
+    
+    private func checkStatus() {
+        switch manager.authorizationStatus {
+        case .authorizedAlways, .authorizedWhenInUse:
+            isAuthorized = true
+        default:
+            isAuthorized = false
+        }
+    }
+    
+    func locationManagerDidChangeAuthorization(_ manager: CLLocationManager) {
+        checkStatus()
     }
 }
 

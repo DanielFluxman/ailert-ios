@@ -22,6 +22,8 @@ Ailert is a project designed to help people in vulnerable situations. We are com
 
 Violations may be reported to the maintainers. All reports will be reviewed confidentially. Consequences may include warnings, temporary bans, or permanent removal from the project.
 
+To report a Code of Conduct issue, email dan@830shop.com.
+
 ## Scope
 
 This applies to all project spaces, including issues, pull requests, discussions, and any public representation of the project.

@@ -7,31 +7,34 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		00000001 /* AilertApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000001; };
-		00000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000002; };
-		00000003 /* Incident.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000003; };
-		00000004 /* MediaCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000004; };
-		00000005 /* TrustedContact.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000005; };
-		00000006 /* EmergencyProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000006; };
-		00000007 /* SensorData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000007; };
-		00000008 /* IncidentSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000008; };
-		00000009 /* SettingsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000009; };
-		00000010 /* SensorFusionEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000010; };
-		00000011 /* EscalationEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000011; };
-		00000012 /* VideoRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000012; };
-		00000013 /* IncidentReportGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000013; };
-		00000014 /* IncidentStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000014; };
-		00000015 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000015; };
-		00000016 /* SOSButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000016; };
-		00000017 /* ActiveIncidentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000017; };
-		00000018 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000018; };
-		00000019 /* IncidentHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000019; };
-		00000020 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000020; };
-		00000021 /* DuressDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000021; };
-		00000022 /* AuditLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000022; };
-		00000023 /* PrivacyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000023; };
-		00000024 /* ShakeDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000024; };
-		00000025 /* VolumeButtonTrigger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000025; };
+		00000001 /* AilertApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000001 /* AilertApp.swift */; };
+		00000002 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000002 /* ContentView.swift */; };
+		00000003 /* Incident.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000003 /* Incident.swift */; };
+		00000004 /* MediaCapture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000004 /* MediaCapture.swift */; };
+		00000005 /* TrustedContact.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000005 /* TrustedContact.swift */; };
+		00000006 /* EmergencyProfile.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000006 /* EmergencyProfile.swift */; };
+		00000007 /* SensorData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000007 /* SensorData.swift */; };
+		00000008 /* IncidentSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000008 /* IncidentSessionManager.swift */; };
+		00000009 /* SettingsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000009 /* SettingsManager.swift */; };
+		00000010 /* SensorFusionEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000010 /* SensorFusionEngine.swift */; };
+		00000011 /* EscalationEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000011 /* EscalationEngine.swift */; };
+		00000012 /* VideoRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000012 /* VideoRecorder.swift */; };
+		00000013 /* IncidentReportGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000013 /* IncidentReportGenerator.swift */; };
+		00000014 /* IncidentStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000014 /* IncidentStore.swift */; };
+		00000015 /* MainView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000015 /* MainView.swift */; };
+		00000016 /* SOSButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000016 /* SOSButtonView.swift */; };
+		00000017 /* ActiveIncidentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000017 /* ActiveIncidentView.swift */; };
+		00000018 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000018 /* SettingsView.swift */; };
+		00000019 /* IncidentHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000019 /* IncidentHistoryView.swift */; };
+		00000020 /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000020 /* OnboardingView.swift */; };
+		00000021 /* DuressDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000021 /* DuressDetector.swift */; };
+		00000022 /* AuditLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000022 /* AuditLogger.swift */; };
+		00000023 /* PrivacyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000023 /* PrivacyManager.swift */; };
+		00000024 /* ShakeDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000024 /* ShakeDetector.swift */; };
+		00000025 /* VolumeButtonTrigger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000025 /* VolumeButtonTrigger.swift */; };
+		00000026 /* MediaViewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000026 /* MediaViewer.swift */; };
+		00000027 /* ContactPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000027 /* ContactPickerView.swift */; };
+		00000028 /* EmergencyClassifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000028 /* EmergencyClassifier.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -60,9 +63,22 @@
 		10000023 /* PrivacyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PrivacyManager.swift; sourceTree = "<group>"; };
 		10000024 /* ShakeDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShakeDetector.swift; sourceTree = "<group>"; };
 		10000025 /* VolumeButtonTrigger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VolumeButtonTrigger.swift; sourceTree = "<group>"; };
+		10000026 /* MediaViewer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaViewer.swift; sourceTree = "<group>"; };
+		10000027 /* ContactPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactPickerView.swift; sourceTree = "<group>"; };
+		10000028 /* EmergencyClassifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmergencyClassifier.swift; sourceTree = "<group>"; };
 		10000099 /* Ailert.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Ailert.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		10000100 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		30000003 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		20000001 = {
@@ -110,6 +126,7 @@
 				10000012 /* VideoRecorder.swift */,
 				10000013 /* IncidentReportGenerator.swift */,
 				10000014 /* IncidentStore.swift */,
+				10000028 /* EmergencyClassifier.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -123,6 +140,8 @@
 				10000018 /* SettingsView.swift */,
 				10000019 /* IncidentHistoryView.swift */,
 				10000020 /* OnboardingView.swift */,
+				10000026 /* MediaViewer.swift */,
+				10000027 /* ContactPickerView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -215,6 +234,16 @@
 		};
 /* End PBXProject section */
 
+/* Begin PBXResourcesBuildPhase section */
+		30000004 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
 /* Begin PBXSourcesBuildPhase section */
 		30000002 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
@@ -245,30 +274,13 @@
 				00000023 /* PrivacyManager.swift in Sources */,
 				00000024 /* ShakeDetector.swift in Sources */,
 				00000025 /* VolumeButtonTrigger.swift in Sources */,
+				00000026 /* MediaViewer.swift in Sources */,
+				00000027 /* ContactPickerView.swift in Sources */,
+				00000028 /* EmergencyClassifier.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXFrameworksBuildPhase section */
-		30000003 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXFrameworksBuildPhase section */
-
-/* Begin PBXResourcesBuildPhase section */
-		30000004 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXResourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
 		60000001 /* Debug */ = {
@@ -397,7 +409,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+					DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Ailert/Resources/Info.plist;
@@ -428,7 +440,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+					DEVELOPMENT_TEAM = "";
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Ailert/Resources/Info.plist;
