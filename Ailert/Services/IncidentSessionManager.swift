@@ -53,7 +53,10 @@ class IncidentSessionManager: ObservableObject {
         self.auditLogger = AuditLogger.shared
         self.emergencyCoordinator = EmergencyCoordinator()
         
-        // Check if coordinator is enabled in settings
+        // Enable coordinator by default for new users
+        if UserDefaults.standard.object(forKey: "llmCoordinatorEnabled") == nil {
+            UserDefaults.standard.set(true, forKey: "llmCoordinatorEnabled")
+        }
         self.isCoordinatorEnabled = UserDefaults.standard.bool(forKey: "llmCoordinatorEnabled")
 
         bindServicePublishers()

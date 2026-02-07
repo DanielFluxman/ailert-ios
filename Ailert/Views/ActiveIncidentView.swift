@@ -66,6 +66,12 @@ struct ActiveIncidentView: View {
 
                 DocumentationStatusView(incidentManager: incidentManager)
                 
+                // AI Coordinator Status (when enabled)
+                if incidentManager.isCoordinatorEnabled {
+                    CoordinatorStatusView(sessionManager: incidentManager)
+                        .padding(.horizontal)
+                }
+                
                 Spacer()
                 
                 // Video recording controls
