@@ -31,6 +31,9 @@ class SettingsManager: ObservableObject {
     @Published var shareLocationWithContacts: Bool = true
     @Published var sharePreciseLocation: Bool = true // vs coarse
     @Published var shareMediaWithContacts: Bool = false
+    @Published var shareLiveTrackerWithContacts: Bool = true
+    @Published var autoNotifyContactsOnLiveShare: Bool = true
+    @Published var includeLiveMediaMetadata: Bool = true
     
     private let defaults = UserDefaults.standard
     private let encoder = JSONEncoder()
@@ -102,6 +105,16 @@ class SettingsManager: ObservableObject {
         
         // Load recording settings
         autoRecordVideo = defaults.bool(forKey: "autoRecordVideo")
+
+        // Load privacy settings
+        shareLocationWithContacts = defaults.object(forKey: "shareLocationWithContacts") as? Bool ?? true
+        sharePreciseLocation = defaults.object(forKey: "sharePreciseLocation") as? Bool ?? true
+        shareMediaWithContacts = defaults.object(forKey: "shareMediaWithContacts") as? Bool ?? false
+
+        // Load live-sharing settings
+        shareLiveTrackerWithContacts = defaults.object(forKey: "shareLiveTrackerWithContacts") as? Bool ?? true
+        autoNotifyContactsOnLiveShare = defaults.object(forKey: "autoNotifyContactsOnLiveShare") as? Bool ?? true
+        includeLiveMediaMetadata = defaults.object(forKey: "includeLiveMediaMetadata") as? Bool ?? true
     }
     
     private func saveContacts() {
@@ -136,5 +149,14 @@ class SettingsManager: ObservableObject {
     
     func saveRecordingSettings() {
         defaults.set(autoRecordVideo, forKey: "autoRecordVideo")
+    }
+
+    func savePrivacySettings() {
+        defaults.set(shareLocationWithContacts, forKey: "shareLocationWithContacts")
+        defaults.set(sharePreciseLocation, forKey: "sharePreciseLocation")
+        defaults.set(shareMediaWithContacts, forKey: "shareMediaWithContacts")
+        defaults.set(shareLiveTrackerWithContacts, forKey: "shareLiveTrackerWithContacts")
+        defaults.set(autoNotifyContactsOnLiveShare, forKey: "autoNotifyContactsOnLiveShare")
+        defaults.set(includeLiveMediaMetadata, forKey: "includeLiveMediaMetadata")
     }
 }

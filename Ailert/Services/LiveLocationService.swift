@@ -11,6 +11,7 @@ class LiveLocationService: ObservableObject {
     @Published var isSharingLocation: Bool = false
     @Published var lastSharedLocation: CLLocation?
     @Published var currentAddress: String = "Locating..."
+    @Published var activeSession: LiveShareSession?
     
     private let geocoder = CLGeocoder()
     
@@ -27,6 +28,67 @@ class LiveLocationService: ObservableObject {
     func stopSharing() {
         isSharingLocation = false
         lastSharedLocation = nil
+    }
+
+    /// Create a live share session that can be sent to contacts.
+    func startLiveShareSession(
+        for incident: Incident,
+        includeMediaMetadata: Bool,
+        autoNotifyContacts: Bool
+    ) -> LiveShareSession {
+        let token = UUID().uuidString.replacingOccurrences(of: "-", with: "").lowercased()
+        let shareURL = generateLiveShareURL(token: token)
+        let session = LiveShareSession(
+            id: UUID(),
+            token: token,
+            shareURL: shareURL,
+            startedAt: Date(),
+            endedAt: nil,
+            isActive: true,
+            updateCount: 0,
+            lastLatitude: nil,
+            lastLongitude: nil,
+            lastAudioDecibels: nil,
+            autoNotifiedContacts: autoNotifyContacts,
+            includesMediaMetadata: includeMediaMetadata
+        )
+        activeSession = session
+        startSharing()
+        return session
+    }
+
+    /// Apply a location/audio update to an existing live share session.
+    func updateLiveShareSession(
+        _ session: LiveShareSession,
+        location: CLLocation?,
+        audioDecibels: Float?
+    ) -> LiveShareSession {
+        var updated = session
+        updated.updateCount += 1
+        updated.isActive = true
+
+        if let location = location {
+            updated.lastLatitude = location.coordinate.latitude
+            updated.lastLongitude = location.coordinate.longitude
+            updateLocation(location)
+        }
+
+        if let audioDecibels = audioDecibels {
+            updated.lastAudioDecibels = audioDecibels
+        }
+
+        activeSession = updated
+        return updated
+    }
+
+    /// Stop an active live share session.
+    func stopLiveShareSession(_ session: LiveShareSession) -> LiveShareSession {
+        var ended = session
+        ended.isActive = false
+        ended.endedAt = Date()
+        activeSession = nil
+        stopSharing()
+        return ended
     }
     
     /// Update current location and address
@@ -52,10 +114,11 @@ class LiveLocationService: ObservableObject {
     }
     
     /// Generate SMS-ready message with location
-    func generateLocationMessage(for incident: Incident, location: CLLocation) -> String {
+    func generateLocationMessage(for incident: Incident, location: CLLocation, liveShareURL: URL? = nil) -> String {
         let lat = location.coordinate.latitude
         let lon = location.coordinate.longitude
         let mapsLink = "https://maps.apple.com/?ll=\(lat),\(lon)&q=Emergency"
+        let liveTrackerLine = liveShareURL.map { "Live tracker: \($0.absoluteString)" } ?? ""
         
         let message = """
         🚨 EMERGENCY ALERT
@@ -66,11 +129,30 @@ class LiveLocationService: ObservableObject {
         Coordinates: \(String(format: "%.6f", lat)), \(String(format: "%.6f", lon))
         Time: \(formatTime(Date()))
         Type: \(incident.classification.displayName)
+        \(liveTrackerLine)
         
         This is an automated alert from Ailert.
         """
         
         return message
+    }
+
+    /// Message used when auto-notifying emergency contacts about a live tracker session.
+    func generateLiveShareMessage(
+        for incident: Incident,
+        shareSession: LiveShareSession,
+        location: CLLocation?
+    ) -> String {
+        let base = "🟢 LIVE TRACKER STARTED\nTrack this emergency in real time:\n\(shareSession.shareURL.absoluteString)"
+        guard let location = location else { return "\(base)\nType: \(incident.classification.displayName)" }
+
+        let lat = location.coordinate.latitude
+        let lon = location.coordinate.longitude
+        return """
+        \(base)
+        Current map: https://maps.apple.com/?ll=\(lat),\(lon)&q=Emergency
+        Type: \(incident.classification.displayName)
+        """
     }
     
     /// Generate location update message (for periodic updates)
@@ -164,8 +246,12 @@ class LiveLocationService: ObservableObject {
             }
         }
     }
-    
+
     // MARK: - Helpers
+
+    private func generateLiveShareURL(token: String) -> URL {
+        URL(string: "https://ailert.app/live/\(token)")!
+    }
     
     private func formatTime(_ date: Date) -> String {
         let formatter = DateFormatter()

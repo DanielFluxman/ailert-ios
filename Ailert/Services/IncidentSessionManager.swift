@@ -19,6 +19,8 @@ class IncidentSessionManager: ObservableObject {
     @Published private(set) var sensorSnapshotCount: Int = 0
     @Published private(set) var isDualCameraCaptureActive: Bool = false
     @Published private(set) var currentLocation: CLLocation?
+    @Published private(set) var isLiveSharing: Bool = false
+    @Published private(set) var liveShareURL: URL?
     
     // MARK: - Services
     private let sensorFusion: SensorFusionEngine
@@ -239,6 +241,73 @@ class IncidentSessionManager: ObservableObject {
             self.saveIncident(incident)
         }
     }
+
+    func startLiveLocationSharing() {
+        guard var incident = currentIncident else { return }
+        guard incident.liveShareSession?.isActive != true else { return }
+
+        let prefs = loadLiveSharePreferences()
+        guard prefs.shareEnabled else {
+            incident.events.append(
+                IncidentEvent(type: .userAction, description: "Live sharing is disabled in Settings")
+            )
+            currentIncident = incident
+            saveIncident(incident)
+            return
+        }
+
+        let session = LiveLocationService.shared.startLiveShareSession(
+            for: incident,
+            includeMediaMetadata: prefs.includeMediaMetadata,
+            autoNotifyContacts: prefs.autoNotifyContacts
+        )
+
+        incident.liveShareSession = session
+        incident.events.append(
+            IncidentEvent(type: .locationUpdated, description: "Live tracker started: \(session.shareURL.absoluteString)")
+        )
+
+        currentIncident = incident
+        isLiveSharing = true
+        liveShareURL = session.shareURL
+        saveIncident(incident)
+
+        if prefs.autoNotifyContacts {
+            Task {
+                await escalationEngine.notifyContactsWithLiveTracker(
+                    incident: incident,
+                    shareSession: session,
+                    location: currentLocation
+                )
+            }
+        }
+    }
+
+    func stopLiveLocationSharing() {
+        guard var incident = currentIncident,
+              let session = incident.liveShareSession,
+              session.isActive else { return }
+
+        let endedSession = LiveLocationService.shared.stopLiveShareSession(session)
+        incident.liveShareSession = endedSession
+        incident.events.append(
+            IncidentEvent(type: .locationUpdated, description: "Live tracker stopped")
+        )
+
+        currentIncident = incident
+        isLiveSharing = false
+        liveShareURL = nil
+        saveIncident(incident)
+    }
+
+    func locationShareMessage() -> String? {
+        guard let incident = currentIncident, let location = currentLocation else { return nil }
+        return LiveLocationService.shared.generateLocationMessage(
+            for: incident,
+            location: location,
+            liveShareURL: incident.liveShareSession?.shareURL
+        )
+    }
     
     // MARK: - Private Helpers
 
@@ -343,6 +412,18 @@ class IncidentSessionManager: ObservableObject {
             incident.locationSnapshots.removeFirst(incident.locationSnapshots.count - 3600)
         }
 
+        if let session = incident.liveShareSession, session.isActive {
+            let audio = liveAudioDecibels > -120 ? liveAudioDecibels : nil
+            let updatedSession = LiveLocationService.shared.updateLiveShareSession(
+                session,
+                location: currentLocation,
+                audioDecibels: audio
+            )
+            incident.liveShareSession = updatedSession
+            liveShareURL = updatedSession.shareURL
+            isLiveSharing = true
+        }
+
         sensorSnapshotCount = incident.sensorSnapshots.count
         currentIncident = incident
         saveIncident(incident)
@@ -366,6 +447,10 @@ class IncidentSessionManager: ObservableObject {
             if finalizedIncident.locationSnapshots.last?.timestamp != locationSnapshot.timestamp {
                 finalizedIncident.locationSnapshots.append(locationSnapshot)
             }
+        }
+
+        if let session = finalizedIncident.liveShareSession, session.isActive {
+            finalizedIncident.liveShareSession = LiveLocationService.shared.stopLiveShareSession(session)
         }
 
         videoRecorder.stopRecording { captures in
@@ -394,6 +479,7 @@ class IncidentSessionManager: ObservableObject {
         documentationTimer = nil
         
         sensorFusion.stopMonitoring()
+        LiveLocationService.shared.stopSharing()
         
         currentIncident = nil
         hasActiveIncident = false
@@ -401,9 +487,19 @@ class IncidentSessionManager: ObservableObject {
         isVideoRecording = false
         videoRecordingDuration = 0
         isDualCameraCaptureActive = false
+        isLiveSharing = false
+        liveShareURL = nil
         sensorSnapshotCount = 0
         liveAudioDecibels = -120
         escalationEngine.reset()
+    }
+
+    private func loadLiveSharePreferences() -> (shareEnabled: Bool, autoNotifyContacts: Bool, includeMediaMetadata: Bool) {
+        let defaults = UserDefaults.standard
+        let shareEnabled = defaults.object(forKey: "shareLiveTrackerWithContacts") as? Bool ?? true
+        let autoNotifyContacts = defaults.object(forKey: "autoNotifyContactsOnLiveShare") as? Bool ?? true
+        let includeMediaMetadata = defaults.object(forKey: "includeLiveMediaMetadata") as? Bool ?? true
+        return (shareEnabled, autoNotifyContacts, includeMediaMetadata)
     }
     
     private func saveIncident(_ incident: Incident) {

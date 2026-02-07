@@ -147,6 +147,20 @@ struct SettingsView: View {
                     Toggle(isOn: $settingsManager.shareMediaWithContacts) {
                         Text("Share Media with Contacts")
                     }
+
+                    Toggle(isOn: $settingsManager.shareLiveTrackerWithContacts) {
+                        Text("Share Live Tracker with Contacts")
+                    }
+
+                    if settingsManager.shareLiveTrackerWithContacts {
+                        Toggle(isOn: $settingsManager.autoNotifyContactsOnLiveShare) {
+                            Text("Auto-Notify Contacts on Live Share")
+                        }
+
+                        Toggle(isOn: $settingsManager.includeLiveMediaMetadata) {
+                            Text("Include Live Media Status")
+                        }
+                    }
                 } header: {
                     Text("Privacy")
                 }
@@ -180,6 +194,12 @@ struct SettingsView: View {
                         dismiss()
                     }
                 }
+            }
+            .onDisappear {
+                settingsManager.saveTriggerSettings()
+                settingsManager.saveEscalationSettings()
+                settingsManager.saveRecordingSettings()
+                settingsManager.savePrivacySettings()
             }
         }
     }

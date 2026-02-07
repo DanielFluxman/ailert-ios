@@ -187,6 +187,10 @@ struct IncidentDetailView: View {
                 if !incident.locationSnapshots.isEmpty {
                     LocationRouteSection(incident: incident)
                 }
+
+                if let liveShare = incident.liveShareSession {
+                    LiveShareSection(liveShare: liveShare)
+                }
                 
                 // Media Gallery
                 if !incident.mediaCaptures.isEmpty {
@@ -327,7 +331,41 @@ struct LocationRouteSection: View {
     }
 }
 
+struct LiveShareSection: View {
+    let liveShare: LiveShareSession
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("Live Tracker")
+                    .font(.headline)
+                Spacer()
+                Text(liveShare.isActive ? "Active" : "Ended")
+                    .font(.caption)
+                    .foregroundColor(liveShare.isActive ? .green : .secondary)
+            }
+
+            Text(liveShare.shareURL.absoluteString)
+                .font(.caption)
+                .foregroundColor(.blue)
+                .textSelection(.enabled)
+
+            HStack(spacing: 16) {
+                Label("\(liveShare.updateCount)", systemImage: "arrow.clockwise.circle")
+                if let lat = liveShare.lastLatitude, let lon = liveShare.lastLongitude {
+                    Label(String(format: "%.4f, %.4f", lat, lon), systemImage: "mappin")
+                }
+            }
+            .font(.caption)
+            .foregroundColor(.secondary)
+        }
+        .padding()
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color(.systemGray6))
+        .cornerRadius(12)
+    }
+}
+
 #Preview {
     IncidentHistoryView()
 }
-

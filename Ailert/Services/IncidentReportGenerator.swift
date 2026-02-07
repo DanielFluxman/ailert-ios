@@ -98,6 +98,27 @@ class IncidentReportGenerator {
             report += "Total Location Points: \(incident.locationSnapshots.count)\n"
             report += "\n"
         }
+
+        if let liveShare = incident.liveShareSession {
+            report += "── LIVE SHARE ────────────────────────────────────────────────\n\n"
+            report += "Session ID: \(liveShare.id.uuidString)\n"
+            report += "Share URL: \(liveShare.shareURL.absoluteString)\n"
+            report += "Started: \(dateFormatter.string(from: liveShare.startedAt))\n"
+            if let endedAt = liveShare.endedAt {
+                report += "Ended: \(dateFormatter.string(from: endedAt))\n"
+            } else {
+                report += "Ended: In progress\n"
+            }
+            report += "Updates Sent: \(liveShare.updateCount)\n"
+            report += "Auto-notified Contacts: \(liveShare.autoNotifiedContacts ? "Yes" : "No")\n"
+            if let lat = liveShare.lastLatitude, let lon = liveShare.lastLongitude {
+                report += "Last Shared Location: \(lat), \(lon)\n"
+            }
+            if let audio = liveShare.lastAudioDecibels {
+                report += "Last Shared Audio Level: \(Int(audio)) dB\n"
+            }
+            report += "\n"
+        }
         
         // Media
         if !incident.mediaCaptures.isEmpty {

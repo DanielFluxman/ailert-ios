@@ -4,6 +4,7 @@
 import Foundation
 import MessageUI
 import CallKit
+import CoreLocation
 
 class EscalationEngine: ObservableObject {
     // MARK: - Published State
@@ -26,14 +27,14 @@ class EscalationEngine: ObservableObject {
             break
             
         case .trustedContacts:
-            await notifyTrustedContacts(for: incident)
+            await notifyTrustedContacts(for: incident, liveShareURL: incident.liveShareSession?.shareURL)
             
         case .emergencyServices:
-            await notifyTrustedContacts(for: incident)
+            await notifyTrustedContacts(for: incident, liveShareURL: incident.liveShareSession?.shareURL)
             prepareEmergencyCall(for: incident)
             
         case .nearbyResponders:
-            await notifyTrustedContacts(for: incident)
+            await notifyTrustedContacts(for: incident, liveShareURL: incident.liveShareSession?.shareURL)
             prepareEmergencyCall(for: incident)
             await alertNearbyResponders(for: incident)
         }
@@ -44,18 +45,47 @@ class EscalationEngine: ObservableObject {
     func silentEscalate(incident: Incident) {
         // Send silent alert to trusted contacts without showing user
         Task {
-            await notifyTrustedContacts(for: incident, isSilent: true)
+            await notifyTrustedContacts(for: incident, isSilent: true, liveShareURL: incident.liveShareSession?.shareURL)
         }
+    }
+
+    func notifyContactsWithLiveTracker(
+        incident: Incident,
+        shareSession: LiveShareSession,
+        location: CLLocation?
+    ) async {
+        let message = LiveLocationService.shared.generateLiveShareMessage(
+            for: incident,
+            shareSession: shareSession,
+            location: location
+        )
+        await notifyTrustedContacts(
+            for: incident,
+            isSilent: false,
+            liveShareURL: shareSession.shareURL,
+            overrideMessage: message
+        )
     }
     
     // MARK: - Trusted Contacts
     
-    private func notifyTrustedContacts(for incident: Incident, isSilent: Bool = false) async {
+    private func notifyTrustedContacts(
+        for incident: Incident,
+        isSilent: Bool = false,
+        liveShareURL: URL? = nil,
+        overrideMessage: String? = nil
+    ) async {
         let contacts = loadTrustedContacts().filter { $0.isEnabled }
         
         for contact in contacts.sorted(by: { $0.priority < $1.priority }) {
             if contact.notifyVia.contains(.sms) {
-                await sendSMS(to: contact, for: incident, isSilent: isSilent)
+                await sendSMS(
+                    to: contact,
+                    for: incident,
+                    isSilent: isSilent,
+                    liveShareURL: liveShareURL,
+                    overrideMessage: overrideMessage
+                )
             }
             
             if contact.notifyVia.contains(.call) && !isSilent {
@@ -66,17 +96,32 @@ class EscalationEngine: ObservableObject {
         }
     }
     
-    private func sendSMS(to contact: TrustedContact, for incident: Incident, isSilent: Bool) async {
-        // Build message
-        var message = isSilent ? "🚨 DURESS ALERT: " : "🆘 EMERGENCY ALERT: "
-        message += "This is an automated alert from Ailert. "
-        
-        if let location = incident.locationSnapshots.last {
-            message += "Location: https://maps.apple.com/?ll=\(location.latitude),\(location.longitude)"
-        }
-        
-        if isSilent {
-            message += " (User may be in danger - this was a silent alert)"
+    private func sendSMS(
+        to contact: TrustedContact,
+        for incident: Incident,
+        isSilent: Bool,
+        liveShareURL: URL? = nil,
+        overrideMessage: String? = nil
+    ) async {
+        let message: String
+        if let overrideMessage = overrideMessage {
+            message = overrideMessage
+        } else {
+            var constructedMessage = isSilent ? "🚨 DURESS ALERT: " : "🆘 EMERGENCY ALERT: "
+            constructedMessage += "This is an automated alert from Ailert. "
+            
+            if let location = incident.locationSnapshots.last {
+                constructedMessage += "Location: https://maps.apple.com/?ll=\(location.latitude),\(location.longitude) "
+            }
+            
+            if let liveShareURL = liveShareURL {
+                constructedMessage += "Live tracker: \(liveShareURL.absoluteString) "
+            }
+            
+            if isSilent {
+                constructedMessage += "(User may be in danger - this was a silent alert)"
+            }
+            message = constructedMessage
         }
         
         // In production, this would use a messaging service or native SMS

@@ -29,6 +29,7 @@ let package = Package(
                 "Services/EscalationEngine.swift",
                 "Services/IncidentReportGenerator.swift",
                 "Services/IncidentSessionManager.swift",
+                "Services/LiveLocationService.swift",
                 "Services/SensorFusionEngine.swift",
                 "Services/SettingsManager.swift",
                 "Services/VideoRecorder.swift",

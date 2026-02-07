@@ -15,6 +15,7 @@ struct Incident: Codable, Identifiable {
     var events: [IncidentEvent]
     var locationSnapshots: [LocationSnapshot]
     var sensorSnapshots: [SensorSnapshot]
+    var liveShareSession: LiveShareSession?
     var escalationLevel: EscalationLevel
     var mediaCaptures: [MediaCapture]
     
@@ -29,6 +30,7 @@ struct Incident: Codable, Identifiable {
         self.events = []
         self.locationSnapshots = []
         self.sensorSnapshots = []
+        self.liveShareSession = nil
         self.escalationLevel = .none
         self.mediaCaptures = []
     }
@@ -141,4 +143,19 @@ struct LocationSnapshot: Codable {
         self.speed = location.speed >= 0 ? location.speed : nil
         self.heading = location.course >= 0 ? location.course : nil
     }
+}
+
+struct LiveShareSession: Codable {
+    let id: UUID
+    let token: String
+    let shareURL: URL
+    let startedAt: Date
+    var endedAt: Date?
+    var isActive: Bool
+    var updateCount: Int
+    var lastLatitude: Double?
+    var lastLongitude: Double?
+    var lastAudioDecibels: Float?
+    var autoNotifiedContacts: Bool
+    var includesMediaMetadata: Bool
 }

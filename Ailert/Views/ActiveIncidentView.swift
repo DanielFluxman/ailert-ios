@@ -2,10 +2,13 @@
 // View displayed during an active emergency incident
 
 import SwiftUI
+import UIKit
 
 struct ActiveIncidentView: View {
     @EnvironmentObject var incidentManager: IncidentSessionManager
     @State private var showCancelSheet = false
+    @State private var showShareSheet = false
+    @State private var shareMessage = ""
     @State private var enteredPIN = ""
     @State private var showCamera = false
     @State private var showClassificationPicker = false
@@ -73,17 +76,17 @@ struct ActiveIncidentView: View {
                 // Action buttons
                 VStack(spacing: 16) {
                     // Share Location button
-                    if let location = incidentManager.currentLocation,
-                       let incident = incidentManager.currentIncident {
-                        ShareLink(
-                            item: LiveLocationService.shared.generateLocationMessage(
-                                for: incident,
-                                location: location
-                            )
-                        ) {
+                    if incidentManager.currentLocation != nil {
+                        Button {
+                            incidentManager.startLiveLocationSharing()
+                            if let message = incidentManager.locationShareMessage() {
+                                shareMessage = message
+                                showShareSheet = true
+                            }
+                        } label: {
                             HStack {
-                                Image(systemName: "location.fill")
-                                Text("Share Location")
+                                Image(systemName: incidentManager.isLiveSharing ? "location.circle.fill" : "location.fill")
+                                Text(incidentManager.isLiveSharing ? "Share Live Update" : "Start Live Share")
                             }
                             .font(.headline)
                             .foregroundColor(.white)
@@ -91,6 +94,41 @@ struct ActiveIncidentView: View {
                             .padding()
                             .background(Color.blue)
                             .cornerRadius(16)
+                        }
+                    }
+
+                    if incidentManager.isLiveSharing, let liveURL = incidentManager.liveShareURL {
+                        VStack(spacing: 8) {
+                            HStack(spacing: 10) {
+                                Text("Live Link Ready")
+                                    .font(.caption)
+                                    .foregroundColor(.white.opacity(0.85))
+                                Spacer()
+                                Button("Copy Link") {
+                                    UIPasteboard.general.string = liveURL.absoluteString
+                                }
+                                .font(.caption)
+                                .padding(.horizontal, 10)
+                                .padding(.vertical, 6)
+                                .background(Color.white.opacity(0.22))
+                                .foregroundColor(.white)
+                                .cornerRadius(10)
+                            }
+
+                            Button {
+                                incidentManager.stopLiveLocationSharing()
+                            } label: {
+                                HStack {
+                                    Image(systemName: "location.slash.fill")
+                                    Text("Stop Live Share")
+                                }
+                                .font(.caption.bold())
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 8)
+                                .background(Color.white.opacity(0.16))
+                                .cornerRadius(10)
+                            }
                         }
                     }
                     
@@ -138,6 +176,9 @@ struct ActiveIncidentView: View {
                 incidentManager.cancelSession(pin: pin)
             }
             .presentationDetents([.medium])
+        }
+        .sheet(isPresented: $showShareSheet) {
+            ShareSheet(activityItems: [shareMessage])
         }
         .confirmationDialog("Change Emergency Type", isPresented: $showClassificationPicker) {
             ForEach(EmergencyClassification.allCases, id: \.self) { classification in
@@ -358,6 +399,20 @@ struct CancelSheet: View {
         }
         .padding(30)
     }
+}
+
+struct ShareSheet: UIViewControllerRepresentable {
+    let activityItems: [Any]
+    var applicationActivities: [UIActivity]? = nil
+
+    func makeUIViewController(context: Context) -> UIActivityViewController {
+        UIActivityViewController(
+            activityItems: activityItems,
+            applicationActivities: applicationActivities
+        )
+    }
+
+    func updateUIViewController(_ uiViewController: UIActivityViewController, context: Context) {}
 }
 
 #Preview {
