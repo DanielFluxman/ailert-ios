@@ -6,7 +6,7 @@
 
 If you discover a security vulnerability in Ailert, please report it responsibly:
 
-1. **Email**: Send details to [security contact - add your email here]
+1. **Email**: Send details to dan@830shop.com
 2. **Include**:
    - Description of the vulnerability
    - Steps to reproduce
