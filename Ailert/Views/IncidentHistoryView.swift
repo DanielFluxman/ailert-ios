@@ -11,11 +11,21 @@ struct IncidentHistoryView: View {
         NavigationStack {
             Group {
                 if incidents.isEmpty {
-                    ContentUnavailableView(
-                        "No Incidents",
-                        systemImage: "clock.arrow.circlepath",
-                        description: Text("Your incident history will appear here")
-                    )
+                    // Empty state (iOS 16 compatible)
+                    VStack(spacing: 16) {
+                        Spacer()
+                        Image(systemName: "clock.arrow.circlepath")
+                            .font(.system(size: 60))
+                            .foregroundColor(.secondary)
+                        Text("No Incidents")
+                            .font(.title2)
+                            .fontWeight(.semibold)
+                        Text("Your incident history will appear here")
+                            .font(.subheadline)
+                            .foregroundColor(.secondary)
+                        Spacer()
+                    }
+                    .frame(maxWidth: .infinity)
                 } else {
                     List {
                         ForEach(incidents) { incident in

@@ -34,7 +34,7 @@ class IncidentSessionManager: ObservableObject {
         self.escalationEngine = EscalationEngine()
         self.videoRecorder = VideoRecorder()
         self.reportGenerator = IncidentReportGenerator()
-        self.auditLogger = AuditLogger()
+        self.auditLogger = AuditLogger.shared
     }
     
     // MARK: - Session Control

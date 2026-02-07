@@ -5,8 +5,10 @@ import Foundation
 import MediaPlayer
 import AVFoundation
 
-class VolumeButtonTrigger: ObservableObject {
+class VolumeButtonTrigger: NSObject, ObservableObject {
     @Published var isEnabled = false
+    
+    private var isObserving = false
     
     private var volumeView: MPVolumeView?
     private var volumeSlider: UISlider?
@@ -18,7 +20,8 @@ class VolumeButtonTrigger: ObservableObject {
     private var requiredPresses = 5
     private var onTriggered: (() -> Void)?
     
-    init() {
+    override init() {
+        super.init()
         setupVolumeObserver()
     }
     
@@ -60,7 +63,7 @@ class VolumeButtonTrigger: ObservableObject {
     }
     
     func startMonitoring() {
-        guard isEnabled else { return }
+        guard isEnabled, !isObserving else { return }
         
         // Get initial volume
         lastVolume = AVAudioSession.sharedInstance().outputVolume
@@ -72,10 +75,13 @@ class VolumeButtonTrigger: ObservableObject {
             options: [.new, .old],
             context: nil
         )
+        isObserving = true
     }
     
     func stopMonitoring() {
-        try? AVAudioSession.sharedInstance().removeObserver(self, forKeyPath: "outputVolume")
+        guard isObserving else { return }
+        AVAudioSession.sharedInstance().removeObserver(self, forKeyPath: "outputVolume")
+        isObserving = false
         pressCount = 0
         lastPressTime = nil
     }
