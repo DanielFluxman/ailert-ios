@@ -16,8 +16,6 @@ If you discover a security vulnerability in Ailert, please report it responsibly
 ## Response Timeline
 
 - **Acknowledgment**: Within 48 hours
-- **Initial Assessment**: Within 7 days
-- **Fix Target**: Based on severity (critical: 7 days, high: 30 days, medium: 90 days)
 
 ## Scope
 
