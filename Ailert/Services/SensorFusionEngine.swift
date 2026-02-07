@@ -13,6 +13,8 @@ class SensorFusionEngine: NSObject, ObservableObject {
     @Published var currentMotionPattern: MotionPattern = .unknown
     @Published var currentLocation: CLLocation?
     @Published var lastSensorSnapshot: SensorSnapshot?
+    @Published var lastAudioData: AudioData?
+    @Published var lastLocationSnapshot: LocationSnapshot?
     
     // MARK: - Managers
     private let motionManager = CMMotionManager()
@@ -59,6 +61,7 @@ class SensorFusionEngine: NSObject, ObservableObject {
         
         motionManager.stopDeviceMotionUpdates()
         locationManager.stopUpdatingLocation()
+        audioEngine?.inputNode.removeTap(onBus: 0)
         audioEngine?.stop()
         audioEngine = nil
         
@@ -158,12 +161,37 @@ class SensorFusionEngine: NSObject, ObservableObject {
     // MARK: - Audio
     
     private func startAudioMonitoring() {
+        let permission = AVAudioSession.sharedInstance().recordPermission
+        if permission == .undetermined {
+            AVAudioSession.sharedInstance().requestRecordPermission { [weak self] granted in
+                guard granted else { return }
+                DispatchQueue.main.async {
+                    self?.startAudioMonitoring()
+                }
+            }
+            return
+        }
+
+        guard permission == .granted else { return }
+
+        do {
+            try AVAudioSession.sharedInstance().setCategory(
+                .playAndRecord,
+                mode: .default,
+                options: [.defaultToSpeaker, .allowBluetooth, .mixWithOthers]
+            )
+            try AVAudioSession.sharedInstance().setActive(true)
+        } catch {
+            print("Failed to configure audio session: \(error)")
+        }
+
         audioEngine = AVAudioEngine()
         guard let audioEngine = audioEngine else { return }
         
         let inputNode = audioEngine.inputNode
         let format = inputNode.outputFormat(forBus: 0)
-        
+        inputNode.removeTap(onBus: 0)
+
         inputNode.installTap(onBus: 0, bufferSize: 1024, format: format) { [weak self] buffer, _ in
             self?.processAudioBuffer(buffer)
         }
@@ -191,8 +219,17 @@ class SensorFusionEngine: NSObject, ObservableObject {
         let average = sum / Float(frameCount)
         let averageDB = 20 * log10(average + 0.0001)
         let peakDB = 20 * log10(peak + 0.0001)
-        
-        // Could add on-device speech recognition for distress keywords here
+
+        let audioData = AudioData(
+            averageDecibels: averageDB,
+            peakDecibels: peakDB,
+            hasVoiceActivity: peakDB > -35,
+            detectedDistressKeywords: nil
+        )
+
+        DispatchQueue.main.async { [weak self] in
+            self?.lastAudioData = audioData
+        }
     }
     
     // MARK: - Snapshot Generation
@@ -200,13 +237,20 @@ class SensorFusionEngine: NSObject, ObservableObject {
     func generateSnapshot() -> SensorSnapshot {
         let deviceContext = DeviceContext()
         let motionData = motionBuffer.last
-        
-        return SensorSnapshot(
+
+        let snapshot = SensorSnapshot(
             timestamp: Date(),
             motion: motionData,
-            audio: nil, // Would include processed audio data
+            audio: lastAudioData,
             deviceContext: deviceContext
         )
+
+        lastSensorSnapshot = snapshot
+        return snapshot
+    }
+
+    func recentLocationSnapshots() -> [LocationSnapshot] {
+        locationBuffer
     }
 }
 
@@ -220,6 +264,7 @@ extension SensorFusionEngine: CLLocationManagerDelegate {
         
         let snapshot = LocationSnapshot(from: location)
         locationBuffer.append(snapshot)
+        lastLocationSnapshot = snapshot
         if locationBuffer.count > bufferLimit {
             locationBuffer.removeFirst()
         }

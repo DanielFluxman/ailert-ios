@@ -14,6 +14,7 @@ struct Incident: Codable, Identifiable {
     var explanation: String?
     var events: [IncidentEvent]
     var locationSnapshots: [LocationSnapshot]
+    var sensorSnapshots: [SensorSnapshot]
     var escalationLevel: EscalationLevel
     var mediaCaptures: [MediaCapture]
     
@@ -27,6 +28,7 @@ struct Incident: Codable, Identifiable {
         self.explanation = nil
         self.events = []
         self.locationSnapshots = []
+        self.sensorSnapshots = []
         self.escalationLevel = .none
         self.mediaCaptures = []
     }

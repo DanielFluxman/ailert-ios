@@ -60,6 +60,8 @@ struct ActiveIncidentView: View {
                 
                 // Escalation level
                 EscalationIndicator(level: incidentManager.currentIncident?.escalationLevel ?? .none)
+
+                DocumentationStatusView(incidentManager: incidentManager)
                 
                 Spacer()
                 
@@ -171,7 +173,6 @@ struct EscalationIndicator: View {
 
 struct VideoControlsView: View {
     @ObservedObject var incidentManager: IncidentSessionManager
-    @StateObject private var videoRecorder = VideoRecorder()
     
     var body: some View {
         HStack(spacing: 30) {
@@ -193,7 +194,7 @@ struct VideoControlsView: View {
             
             // Video record button
             Button {
-                if videoRecorder.isRecording {
+                if incidentManager.isVideoRecording {
                     incidentManager.stopVideoRecording()
                 } else {
                     incidentManager.startVideoRecording()
@@ -202,21 +203,21 @@ struct VideoControlsView: View {
                 VStack(spacing: 8) {
                     ZStack {
                         Circle()
-                            .fill(videoRecorder.isRecording ? Color.white : Color.clear)
+                            .fill(incidentManager.isVideoRecording ? Color.white : Color.clear)
                             .frame(width: 50, height: 50)
                         
                         Circle()
                             .stroke(Color.white, lineWidth: 4)
                             .frame(width: 60, height: 60)
                         
-                        if videoRecorder.isRecording {
+                        if incidentManager.isVideoRecording {
                             RoundedRectangle(cornerRadius: 4)
                                 .fill(Color.red)
                                 .frame(width: 20, height: 20)
                         }
                     }
                     
-                    Text(videoRecorder.isRecording ? formatDuration(videoRecorder.currentDuration) : "Record")
+                    Text(incidentManager.isVideoRecording ? formatDuration(incidentManager.videoRecordingDuration) : "Record")
                         .font(.caption)
                         .foregroundColor(.white)
                 }
@@ -224,7 +225,7 @@ struct VideoControlsView: View {
             
             // Switch camera
             Button {
-                videoRecorder.switchCamera()
+                incidentManager.switchCamera()
             } label: {
                 VStack(spacing: 8) {
                     Image(systemName: "arrow.triangle.2.circlepath.camera.fill")
@@ -244,6 +245,35 @@ struct VideoControlsView: View {
         let mins = Int(seconds) / 60
         let secs = Int(seconds) % 60
         return String(format: "%d:%02d", mins, secs)
+    }
+}
+
+struct DocumentationStatusView: View {
+    @ObservedObject var incidentManager: IncidentSessionManager
+
+    var body: some View {
+        HStack(spacing: 14) {
+            Label(
+                incidentManager.isVideoRecording ? "Video On" : "Video Off",
+                systemImage: incidentManager.isVideoRecording ? "video.fill" : "video.slash.fill"
+            )
+
+            Label(
+                "\(Int(incidentManager.liveAudioDecibels)) dB",
+                systemImage: "waveform"
+            )
+
+            Label(
+                "\(incidentManager.sensorSnapshotCount)",
+                systemImage: "list.bullet.rectangle.portrait"
+            )
+        }
+        .font(.caption.bold())
+        .foregroundColor(.white)
+        .padding(.horizontal, 14)
+        .padding(.vertical, 8)
+        .background(Color.black.opacity(0.22))
+        .cornerRadius(12)
     }
 }
 

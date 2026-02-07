@@ -64,6 +64,21 @@ class IncidentReportGenerator {
             }
             report += "\n"
         }
+
+        if !incident.sensorSnapshots.isEmpty {
+            report += "── SENSOR TIMELINE ───────────────────────────────────────────\n\n"
+            report += "Snapshots Captured: \(incident.sensorSnapshots.count)\n"
+
+            if let lastAudio = incident.sensorSnapshots.compactMap({ $0.audio?.averageDecibels }).last {
+                report += "Last Audio Level: \(Int(lastAudio)) dB\n"
+            }
+
+            if let lastMotion = incident.sensorSnapshots.compactMap({ $0.motion?.accelerationMagnitude }).last {
+                report += "Last Motion Magnitude: \(String(format: "%.2f", lastMotion)) g\n"
+            }
+
+            report += "\n"
+        }
         
         // Location
         if !incident.locationSnapshots.isEmpty {

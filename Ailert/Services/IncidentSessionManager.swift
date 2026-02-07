@@ -12,6 +12,10 @@ class IncidentSessionManager: ObservableObject {
     @Published private(set) var elapsedTime: TimeInterval = 0
     @Published private(set) var currentClassification: EmergencyClassification = .unknown
     @Published private(set) var currentConfidence: Double = 0.0
+    @Published private(set) var isVideoRecording: Bool = false
+    @Published private(set) var videoRecordingDuration: TimeInterval = 0
+    @Published private(set) var liveAudioDecibels: Float = -120
+    @Published private(set) var sensorSnapshotCount: Int = 0
     
     // MARK: - Services
     private let sensorFusion: SensorFusionEngine
@@ -23,10 +27,10 @@ class IncidentSessionManager: ObservableObject {
     // MARK: - Timers
     private var sessionTimer: Timer?
     private var escalationTimer: Timer?
+    private var documentationTimer: Timer?
     private var cancellables = Set<AnyCancellable>()
     
     // MARK: - Configuration
-    private let cancelWindowSeconds: TimeInterval = 30
     private let autoEscalationSeconds: TimeInterval = 60
     
     init() {
@@ -35,6 +39,8 @@ class IncidentSessionManager: ObservableObject {
         self.videoRecorder = VideoRecorder()
         self.reportGenerator = IncidentReportGenerator()
         self.auditLogger = AuditLogger.shared
+
+        bindServicePublishers()
     }
     
     // MARK: - Session Control
@@ -56,14 +62,18 @@ class IncidentSessionManager: ObservableObject {
         currentIncident = incident
         hasActiveIncident = true
         currentClassification = incident.classification
+        currentConfidence = incident.confidence
+        sensorSnapshotCount = 0
         
         // Start timers
         startSessionTimer()
         startEscalationTimer()
+        startDocumentationTimer()
         
-        // Start sensor collection
+        // Start live data collection and evidence capture
         sensorFusion.startMonitoring()
-        
+        startAutomaticDocumentation()
+
         // Log audit event
         auditLogger.log(event: .sessionStarted, incidentId: incident.id)
     }
@@ -79,6 +89,7 @@ class IncidentSessionManager: ObservableObject {
         )
         incident.events.append(event)
         currentIncident = incident
+        saveIncident(incident)
     }
     
     func cancelSession(pin: String? = nil) {
@@ -105,11 +116,12 @@ class IncidentSessionManager: ObservableObject {
         )
         incident.events.append(event)
         incident.sessionEnd = Date()
-        
-        // Save incident to history
-        saveIncident(incident)
-        
-        stopSession()
+
+        finalizeDocumentation(for: incident) { [weak self] finalizedIncident in
+            guard let self = self else { return }
+            self.saveIncident(finalizedIncident)
+            self.stopSession()
+        }
     }
     
     func escalate(to level: EscalationLevel) {
@@ -137,14 +149,15 @@ class IncidentSessionManager: ObservableObject {
         
         incident.status = .resolved
         incident.sessionEnd = Date()
-        
-        // Generate report
-        let report = reportGenerator.generateReport(for: incident)
-        
-        // Save incident
-        saveIncident(incident)
-        
-        stopSession()
+
+        finalizeDocumentation(for: incident) { [weak self] finalizedIncident in
+            guard let self = self else { return }
+
+            let report = self.reportGenerator.generateReport(for: finalizedIncident)
+            _ = self.reportGenerator.saveReport(report)
+            self.saveIncident(finalizedIncident)
+            self.stopSession()
+        }
     }
     
     // MARK: - Video Recording
@@ -152,47 +165,118 @@ class IncidentSessionManager: ObservableObject {
     func startVideoRecording(camera: CameraPosition = .back) {
         guard var incident = currentIncident else { return }
         
-        videoRecorder.startRecording(camera: camera)
-        
-        let event = IncidentEvent(
-            type: .videoRecordingStarted,
-            description: "Video recording started (\(camera == .front ? "front" : "back") camera)"
-        )
+        let started = videoRecorder.startRecording(camera: camera)
+        let event: IncidentEvent
+        if started {
+            event = IncidentEvent(
+                type: .videoRecordingStarted,
+                description: "Video recording started (\(camera == .front ? "front" : "back") camera)"
+            )
+        } else {
+            event = IncidentEvent(
+                type: .userAction,
+                description: "Video recording failed to start: \(videoRecorder.lastError ?? "unknown error")"
+            )
+        }
         incident.events.append(event)
         currentIncident = incident
+        saveIncident(incident)
     }
     
     func stopVideoRecording() {
-        guard var incident = currentIncident else { return }
-        
-        if let capture = videoRecorder.stopRecording() {
-            incident.mediaCaptures.append(capture)
-            
-            let event = IncidentEvent(
-                type: .videoRecordingStopped,
-                description: "Video recording saved"
-            )
-            incident.events.append(event)
-            currentIncident = incident
+        guard currentIncident != nil else { return }
+
+        videoRecorder.stopRecording { [weak self] capture in
+            guard let self = self else { return }
+            guard var incident = self.currentIncident else { return }
+
+            if let capture = capture {
+                incident.mediaCaptures.append(capture)
+                incident.events.append(
+                    IncidentEvent(type: .videoRecordingStopped, description: "Video recording saved locally")
+                )
+            } else {
+                incident.events.append(
+                    IncidentEvent(type: .userAction, description: "Video stop requested, but recorder was not active")
+                )
+            }
+
+            self.currentIncident = incident
+            self.saveIncident(incident)
         }
+    }
+
+    func switchCamera() {
+        videoRecorder.switchCamera()
     }
     
     func capturePhoto() {
-        guard var incident = currentIncident else { return }
+        guard currentIncident != nil else { return }
         
-        if let capture = videoRecorder.capturePhoto() {
-            incident.mediaCaptures.append(capture)
-            
-            let event = IncidentEvent(
-                type: .photoTaken,
-                description: "Photo captured"
-            )
-            incident.events.append(event)
-            currentIncident = incident
+        videoRecorder.capturePhoto { [weak self] capture in
+            guard let self = self else { return }
+            guard var incident = self.currentIncident else { return }
+
+            if let capture = capture {
+                incident.mediaCaptures.append(capture)
+                incident.events.append(
+                    IncidentEvent(type: .photoTaken, description: "Photo captured")
+                )
+            } else {
+                incident.events.append(
+                    IncidentEvent(type: .userAction, description: "Photo capture failed")
+                )
+            }
+
+            self.currentIncident = incident
+            self.saveIncident(incident)
         }
     }
     
     // MARK: - Private Helpers
+
+    private func bindServicePublishers() {
+        videoRecorder.$isRecording
+            .receive(on: RunLoop.main)
+            .sink { [weak self] in self?.isVideoRecording = $0 }
+            .store(in: &cancellables)
+
+        videoRecorder.$currentDuration
+            .receive(on: RunLoop.main)
+            .sink { [weak self] in self?.videoRecordingDuration = $0 }
+            .store(in: &cancellables)
+
+        sensorFusion.$lastAudioData
+            .receive(on: RunLoop.main)
+            .sink { [weak self] in
+                self?.liveAudioDecibels = $0?.averageDecibels ?? -120
+            }
+            .store(in: &cancellables)
+    }
+
+    private func startAutomaticDocumentation() {
+        guard var incident = currentIncident else { return }
+
+        if videoRecorder.startRecording(camera: .back) {
+            incident.events.append(
+                IncidentEvent(type: .videoRecordingStarted, description: "Auto-recording started")
+            )
+        } else {
+            incident.events.append(
+                IncidentEvent(
+                    type: .userAction,
+                    description: "Auto-recording failed: \(videoRecorder.lastError ?? "unknown error")"
+                )
+            )
+        }
+
+        incident.events.append(
+            IncidentEvent(type: .audioDetected, description: "Live audio monitoring started")
+        )
+
+        currentIncident = incident
+        saveIncident(incident)
+    }
     
     private func startSessionTimer() {
         elapsedTime = 0
@@ -210,24 +294,95 @@ class IncidentSessionManager: ObservableObject {
             }
         }
     }
+
+    private func startDocumentationTimer() {
+        documentationTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+            Task { @MainActor in
+                self?.persistDocumentationSnapshot()
+            }
+        }
+    }
+
+    private func persistDocumentationSnapshot() {
+        guard var incident = currentIncident else { return }
+
+        let snapshot = sensorFusion.generateSnapshot()
+        incident.sensorSnapshots.append(snapshot)
+
+        if incident.sensorSnapshots.count > 3600 {
+            incident.sensorSnapshots.removeFirst(incident.sensorSnapshots.count - 3600)
+        }
+
+        if let locationSnapshot = sensorFusion.lastLocationSnapshot {
+            if incident.locationSnapshots.last?.timestamp != locationSnapshot.timestamp {
+                incident.locationSnapshots.append(locationSnapshot)
+            }
+        }
+
+        if incident.locationSnapshots.count > 3600 {
+            incident.locationSnapshots.removeFirst(incident.locationSnapshots.count - 3600)
+        }
+
+        sensorSnapshotCount = incident.sensorSnapshots.count
+        currentIncident = incident
+        saveIncident(incident)
+    }
     
     private func autoEscalate() {
         guard let incident = currentIncident, incident.escalationLevel == .none else { return }
         escalate(to: .trustedContacts)
     }
+
+    private func finalizeDocumentation(for incident: Incident, completion: @escaping (Incident) -> Void) {
+        var finalizedIncident = incident
+
+        if let snapshot = sensorFusion.lastSensorSnapshot {
+            finalizedIncident.sensorSnapshots.append(snapshot)
+        } else {
+            finalizedIncident.sensorSnapshots.append(sensorFusion.generateSnapshot())
+        }
+
+        if let locationSnapshot = sensorFusion.lastLocationSnapshot {
+            if finalizedIncident.locationSnapshots.last?.timestamp != locationSnapshot.timestamp {
+                finalizedIncident.locationSnapshots.append(locationSnapshot)
+            }
+        }
+
+        videoRecorder.stopRecording { capture in
+            var completedIncident = finalizedIncident
+
+            if let capture = capture {
+                completedIncident.mediaCaptures.append(capture)
+                completedIncident.events.append(
+                    IncidentEvent(type: .videoRecordingStopped, description: "Video recording saved locally")
+                )
+                completedIncident.events.append(
+                    IncidentEvent(type: .audioDetected, description: "Audio saved in local video track")
+                )
+            }
+
+            completion(completedIncident)
+        }
+    }
     
     private func stopSession() {
         sessionTimer?.invalidate()
         escalationTimer?.invalidate()
+        documentationTimer?.invalidate()
         sessionTimer = nil
         escalationTimer = nil
+        documentationTimer = nil
         
         sensorFusion.stopMonitoring()
-        videoRecorder.stopRecording()
         
         currentIncident = nil
         hasActiveIncident = false
         elapsedTime = 0
+        isVideoRecording = false
+        videoRecordingDuration = 0
+        sensorSnapshotCount = 0
+        liveAudioDecibels = -120
+        escalationEngine.reset()
     }
     
     private func saveIncident(_ incident: Incident) {
