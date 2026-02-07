@@ -538,6 +538,7 @@ class IncidentSessionManager: ObservableObject {
     }
     
     private func saveIncident(_ incident: Incident) {
+        emergencyCoordinator.updateIncidentContext(incident)
         IncidentStore.shared.save(incident)
     }
     

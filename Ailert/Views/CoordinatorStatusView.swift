@@ -90,7 +90,7 @@ struct CoordinatorStatusView: View {
         ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 8) {
-                    ForEach(sessionManager.coordinatorTranscript.suffix(20)) { entry in
+                    ForEach(sessionManager.coordinatorTranscript.suffix(30)) { entry in
                         TranscriptEntryRow(entry: entry)
                             .id(entry.id)
                     }
@@ -98,7 +98,7 @@ struct CoordinatorStatusView: View {
                 .padding(.horizontal)
                 .padding(.bottom, 12)
             }
-            .frame(maxHeight: 200)
+            .frame(maxHeight: 260)
             .onChange(of: sessionManager.coordinatorTranscript.count) { _ in
                 if let lastEntry = sessionManager.coordinatorTranscript.last {
                     withAnimation {
@@ -190,6 +190,10 @@ struct TranscriptEntryRow: View {
                 .frame(width: 20)
             
             VStack(alignment: .leading, spacing: 2) {
+                Text(entry.type.rawValue.uppercased())
+                    .font(.caption2.bold())
+                    .foregroundColor(iconColor)
+
                 Text(entry.content)
                     .font(.caption)
                     .foregroundColor(.primary)
