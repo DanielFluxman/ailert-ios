@@ -22,12 +22,19 @@ class IncidentSessionManager: ObservableObject {
     @Published private(set) var isLiveSharing: Bool = false
     @Published private(set) var liveShareURL: URL?
     
+    // LLM Coordinator State
+    @Published private(set) var isCoordinatorEnabled: Bool = false
+    @Published private(set) var coordinatorState: CoordinatorState = .idle
+    @Published private(set) var coordinatorTranscript: [LLMTranscriptEntry] = []
+    @Published private(set) var pendingCoordinatorAction: LLMDecision?
+    
     // MARK: - Services
     private let sensorFusion: SensorFusionEngine
     private let escalationEngine: EscalationEngine
     private let videoRecorder: VideoRecorder
     private let reportGenerator: IncidentReportGenerator
     private let auditLogger: AuditLogger
+    private let emergencyCoordinator: EmergencyCoordinator
     
     // MARK: - Timers
     private var sessionTimer: Timer?
@@ -44,8 +51,14 @@ class IncidentSessionManager: ObservableObject {
         self.videoRecorder = VideoRecorder()
         self.reportGenerator = IncidentReportGenerator()
         self.auditLogger = AuditLogger.shared
+        self.emergencyCoordinator = EmergencyCoordinator()
+        
+        // Check if coordinator is enabled in settings
+        self.isCoordinatorEnabled = UserDefaults.standard.bool(forKey: "llmCoordinatorEnabled")
 
         bindServicePublishers()
+        bindCoordinatorPublishers()
+        setupCoordinatorNotifications()
     }
     
     // MARK: - Session Control
@@ -78,6 +91,16 @@ class IncidentSessionManager: ObservableObject {
         // Start live data collection and evidence capture
         sensorFusion.startMonitoring()
         startAutomaticDocumentation()
+        
+        // Start LLM coordinator if enabled
+        if isCoordinatorEnabled {
+            emergencyCoordinator.startCoordinating(
+                for: incident,
+                sensorEngine: sensorFusion,
+                escalationEngine: escalationEngine,
+                classifier: EmergencyClassifier.shared
+            )
+        }
 
         // Log audit event
         auditLogger.log(event: .sessionStarted, incidentId: incident.id)
@@ -485,6 +508,7 @@ class IncidentSessionManager: ObservableObject {
         
         sensorFusion.stopMonitoring()
         LiveLocationService.shared.stopSharing()
+        emergencyCoordinator.stopCoordinating()
         
         currentIncident = nil
         hasActiveIncident = false
@@ -496,6 +520,9 @@ class IncidentSessionManager: ObservableObject {
         liveShareURL = nil
         sensorSnapshotCount = 0
         liveAudioDecibels = -120
+        coordinatorState = .idle
+        coordinatorTranscript.removeAll()
+        pendingCoordinatorAction = nil
         escalationEngine.reset()
     }
 
@@ -509,6 +536,80 @@ class IncidentSessionManager: ObservableObject {
     
     private func saveIncident(_ incident: Incident) {
         IncidentStore.shared.save(incident)
+    }
+    
+    // MARK: - Coordinator Integration
+    
+    private func bindCoordinatorPublishers() {
+        emergencyCoordinator.$state
+            .receive(on: RunLoop.main)
+            .sink { [weak self] in self?.coordinatorState = $0 }
+            .store(in: &cancellables)
+        
+        emergencyCoordinator.$transcript
+            .receive(on: RunLoop.main)
+            .sink { [weak self] in self?.coordinatorTranscript = $0 }
+            .store(in: &cancellables)
+        
+        emergencyCoordinator.$pendingConfirmation
+            .receive(on: RunLoop.main)
+            .sink { [weak self] in self?.pendingCoordinatorAction = $0 }
+            .store(in: &cancellables)
+    }
+    
+    private func setupCoordinatorNotifications() {
+        NotificationCenter.default.addObserver(
+            forName: .llmRequestLocationSharing,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            guard let incidentId = notification.userInfo?["incidentId"] as? UUID,
+                  self?.currentIncident?.id == incidentId else { return }
+            self?.startLiveLocationSharing()
+            
+            // Log the LLM-triggered action
+            if var incident = self?.currentIncident {
+                incident.events.append(
+                    IncidentEvent(type: .llmLocationShareTriggered, description: "AI coordinator enabled live location sharing")
+                )
+                self?.currentIncident = incident
+                self?.saveIncident(incident)
+            }
+        }
+        
+        NotificationCenter.default.addObserver(
+            forName: .llmRequestEvidence,
+            object: nil,
+            queue: .main
+        ) { [weak self] notification in
+            guard let incidentId = notification.userInfo?["incidentId"] as? UUID,
+                  self?.currentIncident?.id == incidentId else { return }
+            self?.capturePhoto()
+        }
+    }
+    
+    func setCoordinatorEnabled(_ enabled: Bool) {
+        isCoordinatorEnabled = enabled
+        UserDefaults.standard.set(enabled, forKey: "llmCoordinatorEnabled")
+        
+        if enabled, hasActiveIncident, let incident = currentIncident {
+            emergencyCoordinator.startCoordinating(
+                for: incident,
+                sensorEngine: sensorFusion,
+                escalationEngine: escalationEngine,
+                classifier: EmergencyClassifier.shared
+            )
+        } else if !enabled {
+            emergencyCoordinator.stopCoordinating()
+        }
+    }
+    
+    func confirmCoordinatorAction() {
+        emergencyCoordinator.confirmPendingAction()
+    }
+    
+    func cancelCoordinatorAction() {
+        emergencyCoordinator.cancelPendingAction()
     }
 }
 

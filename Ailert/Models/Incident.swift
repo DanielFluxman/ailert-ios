@@ -119,6 +119,11 @@ enum EventType: String, Codable {
     case videoRecordingStopped
     case photoTaken
     case userAction
+    // LLM Coordinator events
+    case llmAnalysis
+    case llmActionTaken
+    case llmEscalationTriggered
+    case llmLocationShareTriggered
 }
 
 struct LocationSnapshot: Codable {

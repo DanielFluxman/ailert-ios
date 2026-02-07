@@ -37,6 +37,11 @@
 		00000028 /* EmergencyClassifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000028 /* EmergencyClassifier.swift */; };
 		00000029 /* LiveLocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000029 /* LiveLocationService.swift */; };
 		00000030 /* LocationPlaybackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000030 /* LocationPlaybackView.swift */; };
+		00000031 /* LLMAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000031 /* LLMAction.swift */; };
+		00000032 /* LLMService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000032 /* LLMService.swift */; };
+		00000033 /* LLMContextBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000033 /* LLMContextBuilder.swift */; };
+		00000034 /* EmergencyCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000034 /* EmergencyCoordinator.swift */; };
+		00000035 /* CoordinatorStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000035 /* CoordinatorStatusView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -70,6 +75,11 @@
 		10000028 /* EmergencyClassifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmergencyClassifier.swift; sourceTree = "<group>"; };
 		10000029 /* LiveLocationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveLocationService.swift; sourceTree = "<group>"; };
 		10000030 /* LocationPlaybackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationPlaybackView.swift; sourceTree = "<group>"; };
+		10000031 /* LLMAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMAction.swift; sourceTree = "<group>"; };
+		10000032 /* LLMService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMService.swift; sourceTree = "<group>"; };
+		10000033 /* LLMContextBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMContextBuilder.swift; sourceTree = "<group>"; };
+		10000034 /* EmergencyCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmergencyCoordinator.swift; sourceTree = "<group>"; };
+		10000035 /* CoordinatorStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoordinatorStatusView.swift; sourceTree = "<group>"; };
 		10000099 /* Ailert.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Ailert.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		10000100 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -116,6 +126,7 @@
 				10000005 /* TrustedContact.swift */,
 				10000006 /* EmergencyProfile.swift */,
 				10000007 /* SensorData.swift */,
+				10000031 /* LLMAction.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -132,6 +143,9 @@
 				10000014 /* IncidentStore.swift */,
 				10000028 /* EmergencyClassifier.swift */,
 				10000029 /* LiveLocationService.swift */,
+				10000032 /* LLMService.swift */,
+				10000033 /* LLMContextBuilder.swift */,
+				10000034 /* EmergencyCoordinator.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -148,6 +162,7 @@
 				10000026 /* MediaViewer.swift */,
 				10000027 /* ContactPickerView.swift */,
 				10000030 /* LocationPlaybackView.swift */,
+				10000035 /* CoordinatorStatusView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -285,6 +300,11 @@
 				00000028 /* EmergencyClassifier.swift in Sources */,
 				00000029 /* LiveLocationService.swift in Sources */,
 				00000030 /* LocationPlaybackView.swift in Sources */,
+				00000031 /* LLMAction.swift in Sources */,
+				00000032 /* LLMService.swift in Sources */,
+				00000033 /* LLMContextBuilder.swift in Sources */,
+				00000034 /* EmergencyCoordinator.swift in Sources */,
+				00000035 /* CoordinatorStatusView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
