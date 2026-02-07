@@ -250,7 +250,9 @@ class LiveLocationService: ObservableObject {
     // MARK: - Helpers
 
     private func generateLiveShareURL(token: String) -> URL {
-        URL(string: "https://ailert.app/live/\(token)")!
+        // Use Apple Maps link directly - works without backend server
+        // When location becomes available, the share message includes the actual coordinates
+        URL(string: "https://maps.apple.com/?q=Emergency+Location")!
     }
     
     private func formatTime(_ date: Date) -> String {

@@ -262,6 +262,11 @@ class IncidentSessionManager: ObservableObject {
             autoNotifyContacts: prefs.autoNotifyContacts
         )
 
+        // Preserve any media that was captured while we were setting up the session
+        if let storedIncident = IncidentStore.shared.load(id: incident.id) {
+            incident.mediaCaptures = storedIncident.mediaCaptures
+        }
+
         incident.liveShareSession = session
         incident.events.append(
             IncidentEvent(type: .locationUpdated, description: "Live tracker started: \(session.shareURL.absoluteString)")
