@@ -183,6 +183,11 @@ struct IncidentDetailView: View {
                     .cornerRadius(12)
                 }
                 
+                // Location Route
+                if !incident.locationSnapshots.isEmpty {
+                    LocationRouteSection(incident: incident)
+                }
+                
                 // Media Gallery
                 if !incident.mediaCaptures.isEmpty {
                     VStack(alignment: .leading, spacing: 12) {
@@ -259,6 +264,70 @@ struct IncidentDetailView: View {
     }
 }
 
+// MARK: - Location Route Section
+
+struct LocationRouteSection: View {
+    let incident: Incident
+    @State private var showRoutePlayback = false
+    
+    private var routeSummary: RouteSummary? {
+        LiveLocationService.shared.generateRouteSummary(for: incident.locationSnapshots)
+    }
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack {
+                Text("Location Route")
+                    .font(.headline)
+                Spacer()
+                Text("\(incident.locationSnapshots.count) points")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
+            }
+            
+            if let summary = routeSummary {
+                HStack(spacing: 16) {
+                    // Distance
+                    Label(summary.formattedDistance, systemImage: "arrow.triangle.swap")
+                        .font(.subheadline)
+                    
+                    // Duration
+                    Label(summary.formattedDuration, systemImage: "clock")
+                        .font(.subheadline)
+                    
+                    // Speed
+                    if summary.averageSpeedMph > 1 {
+                        Label("\(Int(summary.averageSpeedMph)) mph", systemImage: "speedometer")
+                            .font(.subheadline)
+                    }
+                }
+                .foregroundColor(.secondary)
+            }
+            
+            Button {
+                showRoutePlayback = true
+            } label: {
+                HStack {
+                    Image(systemName: "map")
+                    Text("View Route")
+                    Spacer()
+                    Image(systemName: "chevron.right")
+                }
+                .font(.subheadline)
+                .foregroundColor(.blue)
+            }
+        }
+        .padding()
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color(.systemGray6))
+        .cornerRadius(12)
+        .sheet(isPresented: $showRoutePlayback) {
+            LocationPlaybackView(incident: incident)
+        }
+    }
+}
+
 #Preview {
     IncidentHistoryView()
 }
+

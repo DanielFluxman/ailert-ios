@@ -35,6 +35,8 @@
 		00000026 /* MediaViewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000026 /* MediaViewer.swift */; };
 		00000027 /* ContactPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000027 /* ContactPickerView.swift */; };
 		00000028 /* EmergencyClassifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000028 /* EmergencyClassifier.swift */; };
+		00000029 /* LiveLocationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000029 /* LiveLocationService.swift */; };
+		00000030 /* LocationPlaybackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000030 /* LocationPlaybackView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -66,6 +68,8 @@
 		10000026 /* MediaViewer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaViewer.swift; sourceTree = "<group>"; };
 		10000027 /* ContactPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContactPickerView.swift; sourceTree = "<group>"; };
 		10000028 /* EmergencyClassifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmergencyClassifier.swift; sourceTree = "<group>"; };
+		10000029 /* LiveLocationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveLocationService.swift; sourceTree = "<group>"; };
+		10000030 /* LocationPlaybackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationPlaybackView.swift; sourceTree = "<group>"; };
 		10000099 /* Ailert.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Ailert.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		10000100 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -127,6 +131,7 @@
 				10000013 /* IncidentReportGenerator.swift */,
 				10000014 /* IncidentStore.swift */,
 				10000028 /* EmergencyClassifier.swift */,
+				10000029 /* LiveLocationService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -142,6 +147,7 @@
 				10000020 /* OnboardingView.swift */,
 				10000026 /* MediaViewer.swift */,
 				10000027 /* ContactPickerView.swift */,
+				10000030 /* LocationPlaybackView.swift */,
 			);
 			path = Views;
 			sourceTree = "<group>";
@@ -277,6 +283,8 @@
 				00000026 /* MediaViewer.swift in Sources */,
 				00000027 /* ContactPickerView.swift in Sources */,
 				00000028 /* EmergencyClassifier.swift in Sources */,
+				00000029 /* LiveLocationService.swift in Sources */,
+				00000030 /* LocationPlaybackView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -409,7 +417,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-					DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 8VZ4VR7B6N;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Ailert/Resources/Info.plist;
@@ -440,7 +448,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-					DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = 8VZ4VR7B6N;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Ailert/Resources/Info.plist;

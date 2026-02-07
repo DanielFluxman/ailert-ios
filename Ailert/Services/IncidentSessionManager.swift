@@ -3,6 +3,7 @@
 
 import Foundation
 import Combine
+import CoreLocation
 
 @MainActor
 class IncidentSessionManager: ObservableObject {
@@ -16,6 +17,8 @@ class IncidentSessionManager: ObservableObject {
     @Published private(set) var videoRecordingDuration: TimeInterval = 0
     @Published private(set) var liveAudioDecibels: Float = -120
     @Published private(set) var sensorSnapshotCount: Int = 0
+    @Published private(set) var isDualCameraCaptureActive: Bool = false
+    @Published private(set) var currentLocation: CLLocation?
     
     // MARK: - Services
     private let sensorFusion: SensorFusionEngine
@@ -168,9 +171,10 @@ class IncidentSessionManager: ObservableObject {
         let started = videoRecorder.startRecording(camera: camera)
         let event: IncidentEvent
         if started {
+            let modeDescription = videoRecorder.isDualCameraEnabled ? "front + back cameras" : (camera == .front ? "front camera" : "back camera")
             event = IncidentEvent(
                 type: .videoRecordingStarted,
-                description: "Video recording started (\(camera == .front ? "front" : "back") camera)"
+                description: "Video recording started (\(modeDescription))"
             )
         } else {
             event = IncidentEvent(
@@ -186,18 +190,21 @@ class IncidentSessionManager: ObservableObject {
     func stopVideoRecording() {
         guard currentIncident != nil else { return }
 
-        videoRecorder.stopRecording { [weak self] capture in
+        videoRecorder.stopRecording { [weak self] captures in
             guard let self = self else { return }
             guard var incident = self.currentIncident else { return }
 
-            if let capture = capture {
-                incident.mediaCaptures.append(capture)
-                incident.events.append(
-                    IncidentEvent(type: .videoRecordingStopped, description: "Video recording saved locally")
-                )
-            } else {
+            if captures.isEmpty {
                 incident.events.append(
                     IncidentEvent(type: .userAction, description: "Video stop requested, but recorder was not active")
+                )
+            } else {
+                incident.mediaCaptures.append(contentsOf: captures)
+                incident.events.append(
+                    IncidentEvent(type: .videoRecordingStopped, description: "\(captures.count) video stream(s) saved locally")
+                )
+                incident.events.append(
+                    IncidentEvent(type: .audioDetected, description: "Audio saved in local recording")
                 )
             }
 
@@ -246,11 +253,21 @@ class IncidentSessionManager: ObservableObject {
             .sink { [weak self] in self?.videoRecordingDuration = $0 }
             .store(in: &cancellables)
 
+        videoRecorder.$isDualCameraEnabled
+            .receive(on: RunLoop.main)
+            .sink { [weak self] in self?.isDualCameraCaptureActive = $0 }
+            .store(in: &cancellables)
+
         sensorFusion.$lastAudioData
             .receive(on: RunLoop.main)
             .sink { [weak self] in
                 self?.liveAudioDecibels = $0?.averageDecibels ?? -120
             }
+            .store(in: &cancellables)
+
+        sensorFusion.$currentLocation
+            .receive(on: RunLoop.main)
+            .sink { [weak self] in self?.currentLocation = $0 }
             .store(in: &cancellables)
     }
 
@@ -259,7 +276,10 @@ class IncidentSessionManager: ObservableObject {
 
         if videoRecorder.startRecording(camera: .back) {
             incident.events.append(
-                IncidentEvent(type: .videoRecordingStarted, description: "Auto-recording started")
+                IncidentEvent(
+                    type: .videoRecordingStarted,
+                    description: videoRecorder.isDualCameraEnabled ? "Auto-recording started (front + back cameras)" : "Auto-recording started (back camera)"
+                )
             )
         } else {
             incident.events.append(
@@ -348,13 +368,13 @@ class IncidentSessionManager: ObservableObject {
             }
         }
 
-        videoRecorder.stopRecording { capture in
+        videoRecorder.stopRecording { captures in
             var completedIncident = finalizedIncident
 
-            if let capture = capture {
-                completedIncident.mediaCaptures.append(capture)
+            if !captures.isEmpty {
+                completedIncident.mediaCaptures.append(contentsOf: captures)
                 completedIncident.events.append(
-                    IncidentEvent(type: .videoRecordingStopped, description: "Video recording saved locally")
+                    IncidentEvent(type: .videoRecordingStopped, description: "\(captures.count) video stream(s) saved locally")
                 )
                 completedIncident.events.append(
                     IncidentEvent(type: .audioDetected, description: "Audio saved in local video track")
@@ -380,6 +400,7 @@ class IncidentSessionManager: ObservableObject {
         elapsedTime = 0
         isVideoRecording = false
         videoRecordingDuration = 0
+        isDualCameraCaptureActive = false
         sensorSnapshotCount = 0
         liveAudioDecibels = -120
         escalationEngine.reset()

@@ -72,6 +72,28 @@ struct ActiveIncidentView: View {
                 
                 // Action buttons
                 VStack(spacing: 16) {
+                    // Share Location button
+                    if let location = incidentManager.currentLocation,
+                       let incident = incidentManager.currentIncident {
+                        ShareLink(
+                            item: LiveLocationService.shared.generateLocationMessage(
+                                for: incident,
+                                location: location
+                            )
+                        ) {
+                            HStack {
+                                Image(systemName: "location.fill")
+                                Text("Share Location")
+                            }
+                            .font(.headline)
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(Color.blue)
+                            .cornerRadius(16)
+                        }
+                    }
+                    
                     // Escalate button
                     Button {
                         let currentLevel = incidentManager.currentIncident?.escalationLevel ?? .none
@@ -224,19 +246,32 @@ struct VideoControlsView: View {
             }
             
             // Switch camera
-            Button {
-                incidentManager.switchCamera()
-            } label: {
+            if incidentManager.isDualCameraCaptureActive {
                 VStack(spacing: 8) {
-                    Image(systemName: "arrow.triangle.2.circlepath.camera.fill")
+                    Image(systemName: "camera.on.rectangle.fill")
                         .font(.title2)
-                    Text("Flip")
+                    Text("Dual")
                         .font(.caption)
                 }
                 .foregroundColor(.white)
                 .frame(width: 70, height: 70)
                 .background(Color.white.opacity(0.2))
                 .cornerRadius(16)
+            } else {
+                Button {
+                    incidentManager.switchCamera()
+                } label: {
+                    VStack(spacing: 8) {
+                        Image(systemName: "arrow.triangle.2.circlepath.camera.fill")
+                            .font(.title2)
+                        Text("Flip")
+                            .font(.caption)
+                    }
+                    .foregroundColor(.white)
+                    .frame(width: 70, height: 70)
+                    .background(Color.white.opacity(0.2))
+                    .cornerRadius(16)
+                }
             }
         }
     }
@@ -256,6 +291,11 @@ struct DocumentationStatusView: View {
             Label(
                 incidentManager.isVideoRecording ? "Video On" : "Video Off",
                 systemImage: incidentManager.isVideoRecording ? "video.fill" : "video.slash.fill"
+            )
+
+            Label(
+                incidentManager.isDualCameraCaptureActive ? "Dual Cam" : "Single Cam",
+                systemImage: incidentManager.isDualCameraCaptureActive ? "camera.on.rectangle.fill" : "camera.fill"
             )
 
             Label(
