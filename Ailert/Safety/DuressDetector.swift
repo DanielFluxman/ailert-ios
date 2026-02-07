@@ -11,7 +11,6 @@ class DuressDetector {
     /// Check if entered PIN indicates duress
     func checkDuress(enteredPIN: String) -> Bool {
         let duressPIN = UserDefaults.standard.string(forKey: "duressPIN") ?? ""
-        let cancelPIN = UserDefaults.standard.string(forKey: "cancelPIN") ?? ""
         
         // If duress PIN is set and matches, this is a duress situation
         if !duressPIN.isEmpty && enteredPIN == duressPIN {
