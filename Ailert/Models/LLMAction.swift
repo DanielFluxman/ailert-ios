@@ -202,15 +202,32 @@ struct LLMTranscriptEntry: Codable, Identifiable {
 }
 
 enum TranscriptEntryType: String, Codable {
+    case user           // User message to coordinator
+    case assistant      // Assistant reply to user
     case observation    // Sensor data observation
     case analysis       // LLM analysis
     case decision       // Action decision
     case action         // Action taken
     case confirmation   // User confirmation
     case error          // Error occurred
+
+    var displayName: String {
+        switch self {
+        case .user: return "User"
+        case .assistant: return "Assistant"
+        case .observation: return "Observation"
+        case .analysis: return "Analysis"
+        case .decision: return "Decision"
+        case .action: return "Action"
+        case .confirmation: return "Confirmation"
+        case .error: return "Error"
+        }
+    }
     
     var icon: String {
         switch self {
+        case .user: return "person.fill"
+        case .assistant: return "bubble.left.and.bubble.right.fill"
         case .observation: return "sensor.tag.radiowaves.forward"
         case .analysis: return "brain"
         case .decision: return "lightbulb.fill"

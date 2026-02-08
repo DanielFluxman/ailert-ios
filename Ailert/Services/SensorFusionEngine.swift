@@ -25,6 +25,8 @@ class SensorFusionEngine: NSObject, ObservableObject {
     private var motionBuffer: [MotionData] = []
     private var locationBuffer: [LocationSnapshot] = []
     private let bufferLimit = 100
+    private var audioBufferObservers: [UUID: (AVAudioPCMBuffer) -> Void] = [:]
+    private let audioBufferObserverQueue = DispatchQueue(label: "SensorFusionEngine.audioObservers")
     
     // MARK: - Configuration
     private let motionUpdateInterval: TimeInterval = 0.1 // 10 Hz
@@ -67,6 +69,9 @@ class SensorFusionEngine: NSObject, ObservableObject {
         
         motionBuffer.removeAll()
         locationBuffer.removeAll()
+        audioBufferObserverQueue.sync {
+            audioBufferObservers.removeAll()
+        }
     }
     
     // MARK: - Motion
@@ -230,6 +235,9 @@ class SensorFusionEngine: NSObject, ObservableObject {
         DispatchQueue.main.async { [weak self] in
             self?.lastAudioData = audioData
         }
+
+        let observers = audioBufferObserverQueue.sync { Array(audioBufferObservers.values) }
+        observers.forEach { $0(buffer) }
     }
     
     // MARK: - Snapshot Generation
@@ -251,6 +259,21 @@ class SensorFusionEngine: NSObject, ObservableObject {
 
     func recentLocationSnapshots() -> [LocationSnapshot] {
         locationBuffer
+    }
+
+    @discardableResult
+    func addAudioBufferObserver(_ observer: @escaping (AVAudioPCMBuffer) -> Void) -> UUID {
+        let id = UUID()
+        audioBufferObserverQueue.sync {
+            audioBufferObservers[id] = observer
+        }
+        return id
+    }
+
+    func removeAudioBufferObserver(_ id: UUID) {
+        audioBufferObserverQueue.sync {
+            audioBufferObservers.removeValue(forKey: id)
+        }
     }
 }
 

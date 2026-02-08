@@ -15,6 +15,9 @@ struct CoordinatorStatusView: View {
             if isExpanded {
                 // Transcript
                 transcriptView
+
+                // Chat composer (text + speech-to-text)
+                chatComposerView
                 
                 // Pending action confirmation
                 if let pending = sessionManager.pendingCoordinatorAction {
@@ -108,6 +111,59 @@ struct CoordinatorStatusView: View {
             }
         }
     }
+
+    // MARK: - Chat Composer
+
+    private var chatComposerView: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Divider()
+
+            HStack(spacing: 8) {
+                Button {
+                    sessionManager.toggleCoordinatorSpeechInput()
+                } label: {
+                    Image(systemName: sessionManager.isCoordinatorSpeechActive ? "waveform.circle.fill" : "mic.circle")
+                        .font(.title3)
+                        .foregroundColor(sessionManager.isCoordinatorSpeechActive ? .red : .blue)
+                }
+
+                TextField("Type or dictate to AI coordinator", text: $sessionManager.coordinatorDraftMessage, axis: .vertical)
+                    .lineLimit(1...3)
+                    .textFieldStyle(.roundedBorder)
+                    .submitLabel(.send)
+                    .onSubmit {
+                        sessionManager.sendCoordinatorDraftMessage()
+                    }
+
+                Button {
+                    sessionManager.sendCoordinatorDraftMessage()
+                } label: {
+                    Image(systemName: "paperplane.fill")
+                        .font(.subheadline.bold())
+                        .foregroundColor(canSendDraft ? .white : .secondary)
+                        .padding(10)
+                        .background(canSendDraft ? Color.blue : Color(.secondarySystemBackground))
+                        .clipShape(Circle())
+                }
+                .disabled(!canSendDraft)
+            }
+            .padding(.horizontal)
+
+            if sessionManager.isCoordinatorSpeechActive {
+                Text("Listening and transcribing...")
+                    .font(.caption2)
+                    .foregroundColor(.red)
+                    .padding(.horizontal)
+            } else if let speechError = sessionManager.coordinatorSpeechError, !speechError.isEmpty {
+                Text(speechError)
+                    .font(.caption2)
+                    .foregroundColor(.orange)
+                    .padding(.horizontal)
+                    .padding(.bottom, 4)
+            }
+        }
+        .padding(.bottom, 8)
+    }
     
     // MARK: - Pending Action
     
@@ -174,6 +230,12 @@ struct CoordinatorStatusView: View {
         case .error: return .red
         }
     }
+
+    private var canSendDraft: Bool {
+        !sessionManager.coordinatorDraftMessage
+            .trimmingCharacters(in: .whitespacesAndNewlines)
+            .isEmpty
+    }
 }
 
 // MARK: - Transcript Entry Row
@@ -183,35 +245,54 @@ struct TranscriptEntryRow: View {
     
     var body: some View {
         HStack(alignment: .top, spacing: 10) {
-            // Icon
-            Image(systemName: entry.type.icon)
-                .font(.caption)
-                .foregroundColor(iconColor)
-                .frame(width: 20)
-            
-            VStack(alignment: .leading, spacing: 2) {
-                Text(entry.type.rawValue.uppercased())
-                    .font(.caption2.bold())
-                    .foregroundColor(iconColor)
-
-                Text(entry.content)
-                    .font(.caption)
-                    .foregroundColor(.primary)
-                
-                Text(timeAgo)
-                    .font(.caption2)
-                    .foregroundColor(.secondary)
+            if isUserMessage {
+                Spacer(minLength: 24)
+                bubbleContent
+                iconView
+            } else {
+                iconView
+                bubbleContent
+                Spacer(minLength: 24)
             }
+        }
+        .padding(10)
+    }
+
+    private var iconView: some View {
+        Image(systemName: entry.type.icon)
+            .font(.caption)
+            .foregroundColor(iconColor)
+            .frame(width: 20)
+            .padding(.top, 2)
+    }
+
+    private var bubbleContent: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(entry.type.displayName.uppercased())
+                .font(.caption2.bold())
+                .foregroundColor(iconColor)
+
+            Text(entry.content)
+                .font(.caption)
+                .foregroundColor(.primary)
             
-            Spacer()
+            Text(timeAgo)
+                .font(.caption2)
+                .foregroundColor(.secondary)
         }
         .padding(10)
         .background(backgroundColor)
-        .cornerRadius(8)
+        .cornerRadius(10)
+    }
+
+    private var isUserMessage: Bool {
+        entry.type == .user
     }
     
     private var iconColor: Color {
         switch entry.type {
+        case .user: return .blue
+        case .assistant: return .mint
         case .observation: return .blue
         case .analysis: return .purple
         case .decision: return .orange
@@ -223,6 +304,8 @@ struct TranscriptEntryRow: View {
     
     private var backgroundColor: Color {
         switch entry.type {
+        case .user: return .blue.opacity(0.12)
+        case .assistant: return .mint.opacity(0.12)
         case .action, .confirmation: return .green.opacity(0.1)
         case .decision: return .orange.opacity(0.1)
         case .error: return .red.opacity(0.1)

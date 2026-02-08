@@ -62,13 +62,23 @@ class LLMContextBuilder {
         motionPattern: MotionPattern,
         detectedSounds: [DetectedSound],
         currentLocation: CLLocation?,
-        previousDecisions: [LLMDecision]
+        previousDecisions: [LLMDecision],
+        speechTranscript: String? = nil
     ) -> String {
         var context = "## Current Incident Status\n"
         context += "- Started: \(formatTimeAgo(incident.sessionStart))\n"
         context += "- Classification: \(incident.classification.displayName)\n"
         context += "- Escalation Level: \(incident.escalationLevel.displayName)\n"
         context += "- Location Sharing: \(incident.liveShareSession?.isActive == true ? "Active" : "Not active")\n"
+        context += "\n"
+        
+        // Live Speech Transcript (CRITICAL for understanding what's happening)
+        context += "## Live Audio Transcript\n"
+        if let transcript = speechTranscript, !transcript.isEmpty {
+            context += transcript + "\n"
+        } else {
+            context += "[No speech detected or transcription not available]\n"
+        }
         context += "\n"
         
         // Motion analysis

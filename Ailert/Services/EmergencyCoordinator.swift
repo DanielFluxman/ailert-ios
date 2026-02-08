@@ -20,6 +20,7 @@ class EmergencyCoordinator: ObservableObject {
     // MARK: - Dependencies
     
     private let llmService: LLMService
+    private let speechService: SpeechTranscriptionService
     private weak var sensorEngine: SensorFusionEngine?
     private weak var escalationEngine: EscalationEngine?
     private weak var classifier: EmergencyClassifier?
@@ -27,6 +28,7 @@ class EmergencyCoordinator: ObservableObject {
     // MARK: - Configuration
     
     private let updateInterval: TimeInterval = 10  // Seconds between LLM updates
+    private let chatTemperature: Double = 0.2
     private var currentIncident: Incident?
     private var updateTimer: Timer?
     private var recentSensorSnapshots: [SensorSnapshot] = []
@@ -40,11 +42,13 @@ class EmergencyCoordinator: ObservableObject {
     
     init(
         llmService: LLMService = .shared,
+        speechService: SpeechTranscriptionService = .shared,
         sensorEngine: SensorFusionEngine? = nil,
         escalationEngine: EscalationEngine? = nil,
         classifier: EmergencyClassifier? = nil
     ) {
         self.llmService = llmService
+        self.speechService = speechService
         self.sensorEngine = sensorEngine
         self.escalationEngine = escalationEngine
         self.classifier = classifier
@@ -71,8 +75,22 @@ class EmergencyCoordinator: ObservableObject {
         
         addTranscriptEntry(
             type: .observation,
-            content: "Emergency Coordinator activated. Monitoring sensors..."
+            content: "Emergency Coordinator activated. Monitoring sensors and listening to audio..."
         )
+        
+        // Start live speech transcription
+        do {
+            try speechService.startTranscribing()
+            addTranscriptEntry(
+                type: .observation,
+                content: "Live audio transcription active"
+            )
+        } catch {
+            addTranscriptEntry(
+                type: .error,
+                content: "Speech transcription unavailable: \(error.localizedDescription)"
+            )
+        }
         
         // Subscribe to sensor updates
         bindSensorUpdates()
@@ -85,6 +103,10 @@ class EmergencyCoordinator: ObservableObject {
         updateTimer?.invalidate()
         updateTimer = nil
         cancellables.removeAll()
+        
+        // Stop speech transcription
+        speechService.stopTranscribing()
+        speechService.clearTranscripts()
         
         if state.isActive {
             addTranscriptEntry(
@@ -130,6 +152,106 @@ class EmergencyCoordinator: ObservableObject {
         
         pendingConfirmation = nil
         state = .listening
+    }
+
+    // MARK: - User Conversation
+
+    func processUserMessage(_ rawMessage: String) async {
+        let message = rawMessage.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !message.isEmpty else { return }
+
+        addTranscriptEntry(type: .user, content: message)
+
+        guard let incident = currentIncident, let sensorEngine = sensorEngine else {
+            addTranscriptEntry(
+                type: .assistant,
+                content: "Coordinator is not active right now. Start an emergency session first."
+            )
+            return
+        }
+
+        if let directCommand = inferDirectCommandDecision(from: message) {
+            addTranscriptEntry(type: .assistant, content: directCommand.reply)
+            await handleDecision(directCommand.decision)
+            return
+        }
+
+        let previousState = state
+        if state != .waitingConfirm && state != .acting {
+            state = .analyzing
+        }
+
+        let detectedSounds = classifier?.detectedSounds ?? []
+        let contextPrompt = LLMContextBuilder.buildContextPrompt(
+            incident: incident,
+            recentSensorData: recentSensorSnapshots,
+            motionPattern: sensorEngine.currentMotionPattern,
+            detectedSounds: detectedSounds,
+            currentLocation: sensorEngine.currentLocation,
+            previousDecisions: decisions,
+            speechTranscript: speechService.getRecentTranscriptsForContext()
+        )
+
+        let userPrompt = """
+        \(contextPrompt)
+
+        ## User Message
+        \(message)
+
+        Respond ONLY with JSON in this format:
+        {
+          "reply": "short, calm response to the user",
+          "action": "shareLocation|notifyContacts|escalateToServices|captureEvidence|suggestAction|updateStatus|noAction",
+          "certainty": 0.0-1.0,
+          "reasoning": "why this action is appropriate",
+          "message": "optional outbound message if needed"
+        }
+        """
+
+        do {
+            let response = try await llmService.complete(
+                systemPrompt: Self.chatSystemPrompt,
+                userPrompt: userPrompt,
+                temperature: chatTemperature
+            )
+
+            if let parsed = parseConversationResponse(from: response) {
+                addTranscriptEntry(type: .assistant, content: parsed.reply)
+                if let decision = parsed.decision {
+                    await handleDecision(decision)
+                }
+            } else {
+                let fallbackReply = extractFallbackReply(from: response)
+                addTranscriptEntry(type: .assistant, content: fallbackReply)
+            }
+        } catch let error as LLMError {
+            switch error {
+            case .missingAPIKey:
+                addTranscriptEntry(
+                    type: .assistant,
+                    content: "LLM API key is not configured. I can still run direct commands like: share location, notify contacts, take photo, or call 911."
+                )
+            default:
+                addTranscriptEntry(
+                    type: .assistant,
+                    content: "I hit an AI error (\(error.localizedDescription)). I’m still monitoring sensors and can run direct commands."
+                )
+            }
+            lastError = error.localizedDescription
+        } catch {
+            lastError = error.localizedDescription
+            addTranscriptEntry(
+                type: .assistant,
+                content: "I couldn’t process that message (\(error.localizedDescription)). Please try again."
+            )
+        }
+
+        if state == .analyzing {
+            state = previousState == .idle ? .listening : previousState
+            if state == .analyzing {
+                state = .listening
+            }
+        }
     }
     
     // MARK: - Private - Sensor Binding
@@ -211,7 +333,8 @@ class EmergencyCoordinator: ObservableObject {
             motionPattern: sensorEngine.currentMotionPattern,
             detectedSounds: detectedSounds,
             currentLocation: sensorEngine.currentLocation,
-            previousDecisions: decisions
+            previousDecisions: decisions,
+            speechTranscript: speechService.getRecentTranscriptsForContext()
         )
         
         do {
@@ -297,13 +420,7 @@ class EmergencyCoordinator: ObservableObject {
             return
         }
         
-        if decision.canExecuteAutonomously {
-            addTranscriptEntry(
-                type: .action,
-                content: "Executing: \(decision.actionType.displayName)"
-            )
-            await executeDecision(decision)
-        } else if decision.actionType.requiresConfirmation || decision.certaintyLevel < decision.actionType.minimumCertainty {
+        if decision.actionType.requiresConfirmation || decision.certaintyLevel < decision.actionType.minimumCertainty {
             // Need user confirmation
             pendingConfirmation = decision
             state = .waitingConfirm
@@ -311,6 +428,12 @@ class EmergencyCoordinator: ObservableObject {
                 type: .decision,
                 content: "Awaiting confirmation: \(decision.actionType.displayName)"
             )
+        } else if decision.canExecuteAutonomously {
+            addTranscriptEntry(
+                type: .action,
+                content: "Executing: \(decision.actionType.displayName)"
+            )
+            await executeDecision(decision)
         }
     }
     
@@ -365,6 +488,23 @@ class EmergencyCoordinator: ObservableObject {
     }
     
     // MARK: - Private - Transcript
+
+    private static let chatSystemPrompt = """
+    You are Ailert's emergency coordinator speaking directly to a user during an active incident.
+    Keep replies concise, calm, and actionable.
+    Always consider the provided live sensor and location context when deciding actions.
+    If high risk is detected, choose a concrete action instead of vague advice.
+    """
+
+    private struct ConversationParseResult {
+        let reply: String
+        let decision: LLMDecision?
+    }
+
+    private struct DirectCommandResult {
+        let reply: String
+        let decision: LLMDecision
+    }
 
     private struct CandidateAction {
         let actionType: LLMActionType
@@ -617,6 +757,109 @@ class EmergencyCoordinator: ObservableObject {
         default:
             return .noAction
         }
+    }
+
+    private func parseConversationResponse(from response: String) -> ConversationParseResult? {
+        for candidate in extractJSONObjectCandidates(from: response) {
+            guard let data = candidate.data(using: .utf8),
+                  let json = try? JSONSerialization.jsonObject(with: data) as? [String: Any] else {
+                continue
+            }
+
+            let reply = (json["reply"] as? String)?
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            let fallbackMessage = (json["message"] as? String)?
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+            let outputReply = (reply?.isEmpty == false ? reply : nil)
+                ?? (fallbackMessage?.isEmpty == false ? fallbackMessage : nil)
+                ?? "Received your message. Continuing to monitor and assist."
+
+            let decision: LLMDecision?
+            if let certaintyValue = parseDoubleValue(json["certainty"]),
+               let reasoning = (json["reasoning"] as? String)?
+                    .trimmingCharacters(in: .whitespacesAndNewlines),
+               !reasoning.isEmpty {
+                decision = LLMDecision(
+                    actionType: parseActionType(json["action"]),
+                    reasoning: reasoning,
+                    certainty: max(0, min(1, certaintyValue)),
+                    suggestedMessage: fallbackMessage
+                )
+            } else {
+                decision = nil
+            }
+
+            return ConversationParseResult(reply: outputReply, decision: decision)
+        }
+        return nil
+    }
+
+    private func extractFallbackReply(from response: String) -> String {
+        let trimmed = response.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else {
+            return "Received your message. Continuing to monitor and assist."
+        }
+        if trimmed.count <= 280 {
+            return trimmed
+        }
+        let end = trimmed.index(trimmed.startIndex, offsetBy: 280)
+        return String(trimmed[..<end]) + "..."
+    }
+
+    private func inferDirectCommandDecision(from message: String) -> DirectCommandResult? {
+        let normalized = message
+            .lowercased()
+            .replacingOccurrences(of: "[^a-z0-9\\s]", with: " ", options: .regularExpression)
+
+        func containsAny(_ phrases: [String]) -> Bool {
+            phrases.contains(where: { normalized.contains($0) })
+        }
+
+        if containsAny(["share location", "share my location", "start live share", "turn on location"]) {
+            return DirectCommandResult(
+                reply: "Sharing your live location now.",
+                decision: LLMDecision(
+                    actionType: .shareLocation,
+                    reasoning: "User explicitly requested live location sharing.",
+                    certainty: 0.95
+                )
+            )
+        }
+
+        if containsAny(["notify contacts", "text my contacts", "alert my contacts", "notify my family"]) {
+            return DirectCommandResult(
+                reply: "Notifying your trusted contacts now.",
+                decision: LLMDecision(
+                    actionType: .notifyContacts,
+                    reasoning: "User explicitly requested contact notification.",
+                    certainty: 0.92
+                )
+            )
+        }
+
+        if containsAny(["take photo", "capture photo", "capture evidence", "take picture"]) {
+            return DirectCommandResult(
+                reply: "Capturing evidence now.",
+                decision: LLMDecision(
+                    actionType: .captureEvidence,
+                    reasoning: "User requested immediate evidence capture.",
+                    certainty: 0.9
+                )
+            )
+        }
+
+        if containsAny(["call 911", "call emergency", "contact emergency services"]) {
+            return DirectCommandResult(
+                reply: "I can start emergency escalation. Please confirm before calling emergency services.",
+                decision: LLMDecision(
+                    actionType: .escalateToServices,
+                    reasoning: "User requested emergency service contact.",
+                    certainty: 0.97
+                )
+            )
+        }
+
+        return nil
     }
     
     private func addTranscriptEntry(type: TranscriptEntryType, content: String) {

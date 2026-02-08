@@ -4,6 +4,7 @@
 import Foundation
 import Combine
 import CoreLocation
+import Speech
 
 @MainActor
 class IncidentSessionManager: ObservableObject {
@@ -27,6 +28,9 @@ class IncidentSessionManager: ObservableObject {
     @Published private(set) var coordinatorState: CoordinatorState = .idle
     @Published private(set) var coordinatorTranscript: [LLMTranscriptEntry] = []
     @Published private(set) var pendingCoordinatorAction: LLMDecision?
+    @Published var coordinatorDraftMessage: String = ""
+    @Published private(set) var isCoordinatorSpeechActive: Bool = false
+    @Published private(set) var coordinatorSpeechError: String?
     
     // MARK: - Services
     private let sensorFusion: SensorFusionEngine
@@ -35,11 +39,15 @@ class IncidentSessionManager: ObservableObject {
     private let reportGenerator: IncidentReportGenerator
     private let auditLogger: AuditLogger
     private let emergencyCoordinator: EmergencyCoordinator
+    private let speechRecognizer = SFSpeechRecognizer(locale: Locale.current)
     
     // MARK: - Timers
     private var sessionTimer: Timer?
     private var escalationTimer: Timer?
     private var documentationTimer: Timer?
+    private var speechRecognitionTask: SFSpeechRecognitionTask?
+    private var speechRecognitionRequest: SFSpeechAudioBufferRecognitionRequest?
+    private var speechAudioObserverId: UUID?
     private var cancellables = Set<AnyCancellable>()
     
     // MARK: - Configuration
@@ -85,6 +93,9 @@ class IncidentSessionManager: ObservableObject {
         currentClassification = incident.classification
         currentConfidence = incident.confidence
         sensorSnapshotCount = 0
+        coordinatorDraftMessage = ""
+        coordinatorSpeechError = nil
+        isCoordinatorSpeechActive = false
         
         // Start timers
         startSessionTimer()
@@ -502,6 +513,7 @@ class IncidentSessionManager: ObservableObject {
     }
     
     private func stopSession() {
+        stopCoordinatorSpeechInput(sendCapturedMessage: false)
         sessionTimer?.invalidate()
         escalationTimer?.invalidate()
         documentationTimer?.invalidate()
@@ -526,6 +538,8 @@ class IncidentSessionManager: ObservableObject {
         coordinatorState = .idle
         coordinatorTranscript.removeAll()
         pendingCoordinatorAction = nil
+        coordinatorDraftMessage = ""
+        coordinatorSpeechError = nil
         escalationEngine.reset()
     }
 
@@ -604,7 +618,146 @@ class IncidentSessionManager: ObservableObject {
                 classifier: EmergencyClassifier.shared
             )
         } else if !enabled {
+            stopCoordinatorSpeechInput(sendCapturedMessage: false)
             emergencyCoordinator.stopCoordinating()
+        }
+    }
+
+    func sendCoordinatorDraftMessage() {
+        sendCoordinatorMessage(coordinatorDraftMessage)
+    }
+
+    func sendCoordinatorMessage(_ rawMessage: String) {
+        let message = rawMessage.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !message.isEmpty else { return }
+        guard hasActiveIncident, isCoordinatorEnabled else {
+            coordinatorSpeechError = "AI Coordinator is not active."
+            return
+        }
+
+        if isCoordinatorSpeechActive {
+            stopCoordinatorSpeechInput(sendCapturedMessage: false)
+        }
+
+        coordinatorDraftMessage = ""
+        coordinatorSpeechError = nil
+
+        Task { [weak self] in
+            await self?.emergencyCoordinator.processUserMessage(message)
+        }
+    }
+
+    func toggleCoordinatorSpeechInput() {
+        if isCoordinatorSpeechActive {
+            stopCoordinatorSpeechInput(sendCapturedMessage: true)
+        } else {
+            startCoordinatorSpeechInput()
+        }
+    }
+
+    func stopCoordinatorSpeechInput(sendCapturedMessage: Bool = false) {
+        let captured = coordinatorDraftMessage.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        if let observerId = speechAudioObserverId {
+            sensorFusion.removeAudioBufferObserver(observerId)
+            speechAudioObserverId = nil
+        }
+
+        speechRecognitionRequest?.endAudio()
+        speechRecognitionRequest = nil
+        speechRecognitionTask?.cancel()
+        speechRecognitionTask = nil
+        isCoordinatorSpeechActive = false
+
+        if sendCapturedMessage, !captured.isEmpty {
+            sendCoordinatorMessage(captured)
+        }
+    }
+
+    private func startCoordinatorSpeechInput() {
+        guard hasActiveIncident, isCoordinatorEnabled else {
+            coordinatorSpeechError = "Voice input requires an active incident with AI Coordinator enabled."
+            return
+        }
+
+        switch SFSpeechRecognizer.authorizationStatus() {
+        case .authorized:
+            beginCoordinatorSpeechRecognition()
+        case .notDetermined:
+            SFSpeechRecognizer.requestAuthorization { [weak self] status in
+                Task { @MainActor in
+                    guard let self = self else { return }
+                    if status == .authorized {
+                        self.beginCoordinatorSpeechRecognition()
+                    } else {
+                        self.coordinatorSpeechError = self.speechAuthorizationMessage(for: status)
+                    }
+                }
+            }
+        case .denied, .restricted:
+            coordinatorSpeechError = speechAuthorizationMessage(for: SFSpeechRecognizer.authorizationStatus())
+        @unknown default:
+            coordinatorSpeechError = "Speech recognition is unavailable on this device."
+        }
+    }
+
+    private func beginCoordinatorSpeechRecognition() {
+        guard !isCoordinatorSpeechActive else { return }
+        guard let recognizer = speechRecognizer else {
+            coordinatorSpeechError = "Speech recognizer is not available for this locale."
+            return
+        }
+        guard recognizer.isAvailable else {
+            coordinatorSpeechError = "Speech recognition is temporarily unavailable."
+            return
+        }
+
+        stopCoordinatorSpeechInput(sendCapturedMessage: false)
+        coordinatorSpeechError = nil
+
+        let request = SFSpeechAudioBufferRecognitionRequest()
+        request.shouldReportPartialResults = true
+        speechRecognitionRequest = request
+
+        speechAudioObserverId = sensorFusion.addAudioBufferObserver { buffer in
+            request.append(buffer)
+        }
+
+        speechRecognitionTask = recognizer.recognitionTask(with: request) { [weak self] result, error in
+            Task { @MainActor in
+                guard let self = self else { return }
+
+                if let result = result {
+                    self.coordinatorDraftMessage = result.bestTranscription.formattedString
+                    if result.isFinal {
+                        self.stopCoordinatorSpeechInput(sendCapturedMessage: true)
+                        return
+                    }
+                }
+
+                if let error = error {
+                    guard self.isCoordinatorSpeechActive else { return }
+                    self.coordinatorSpeechError = "Speech recognition failed: \(error.localizedDescription)"
+                    self.stopCoordinatorSpeechInput(sendCapturedMessage: false)
+                }
+            }
+        }
+
+        isCoordinatorSpeechActive = true
+    }
+
+    private func speechAuthorizationMessage(for status: SFSpeechRecognizerAuthorizationStatus) -> String {
+        switch status {
+        case .denied:
+            return "Speech recognition permission is denied. Enable it in Settings > Privacy & Security > Speech Recognition."
+        case .restricted:
+            return "Speech recognition is restricted on this device."
+        case .authorized:
+            return ""
+        case .notDetermined:
+            return "Speech recognition permission has not been granted yet."
+        @unknown default:
+            return "Speech recognition is unavailable."
         }
     }
     
