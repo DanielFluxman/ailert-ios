@@ -14,11 +14,12 @@
 - Planned: Home screen widget for instant access
 - Planned: Apple Watch support for wrist-based triggers
 
-### 🧠 On-Device AI + Sensor Fusion
-- **Motion Analysis**: Fall detection, impact detection, sudden stops
-- **Audio Monitoring**: Ambient sound levels, distress detection
+### 🧠 Sensor Fusion + AI Coordinator
+- **On-Device Motion Analysis**: Fall detection, impact detection, sudden stops
+- **On-Device Audio Monitoring**: Ambient sound levels, voice activity, distress cues
 - **Location Tracking**: GPS coordinates, speed, heading
-- **Device Context**: Battery, network status, time
+- **AI Coordinator Dashboard**: Live transcript of sensor observations, interpreted risk, and actions being considered
+- **Optional LLM Decision Support**: OpenAI-backed action proposals for location sharing, contact notification, and escalation
 
 ### 📋 Incident Documentation
 - **Video Recording**: Front/back camera, background recording
@@ -50,7 +51,7 @@
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/ailert/ailert-ios.git
+git clone https://github.com/DanielFluxman/ailert-ios.git
 cd ailert-ios
 ```
 
@@ -62,6 +63,17 @@ open Ailert.xcodeproj
 3. Configure signing with your team
 
 4. Build and run on device (simulator lacks some sensors)
+
+### Optional: AI Coordinator LLM Setup
+
+The AI coordinator can run with OpenAI when an API key is configured.
+
+1. In Xcode, open `Product` -> `Scheme` -> `Edit Scheme...`
+2. Select `Run` -> `Arguments`
+3. Add environment variable `OPENAI_API_KEY` with your key
+4. Run on device
+
+Without an API key, core safety features still run, but cloud coordinator analysis will be unavailable.
 
 ### Permissions
 The app requires these permissions for full functionality:
@@ -88,6 +100,8 @@ Ailert/
 |-----------|---------|
 | `IncidentSessionManager` | Central coordinator for active emergencies |
 | `SensorFusionEngine` | Combines motion, audio, location data |
+| `EmergencyCoordinator` | Interprets incident context and proposes or executes safety actions |
+| `CoordinatorStatusView` | Shows live AI transcript: observations, analysis, decisions, and actions |
 | `EscalationEngine` | Handles progressive alert escalation |
 | `VideoRecorder` | AVFoundation-based evidence capture |
 | `DuressDetector` | Identifies coerced cancellations |
@@ -108,7 +122,8 @@ We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guid
 
 Ailert is designed with privacy as a core principle:
 
-- **On-device AI**: All inference runs locally, never uploaded
+- **On-device first**: Sensor fusion and core emergency workflows run locally
+- **Optional cloud coordinator**: If `OPENAI_API_KEY` is configured, incident context is sent to OpenAI for coordinator analysis
 - **User-controlled sharing**: You decide what to share and with whom
 - **Data minimization**: Only essential data is collected
 - **Secure storage**: Encrypted local storage for sensitive data

@@ -379,7 +379,7 @@ struct SafetyInfoPage: View {
                 SafetyTip(
                     icon: "lock.shield.fill",
                     title: "Privacy First",
-                    description: "All AI runs on-device. Your data stays with you."
+                    description: "Core safety detection is on-device. Optional AI coordinator uses your configured provider."
                 )
             }
             .padding()

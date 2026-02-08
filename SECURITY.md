@@ -44,10 +44,11 @@ We will not pursue legal action against researchers who:
 
 Ailert is built with these security principles:
 
-1. **On-device processing**: AI and sensor analysis happen locally
+1. **On-device first processing**: Sensor fusion, triggers, and core emergency workflows run locally
 2. **Minimal data collection**: Only essential emergency data
 3. **User control**: Users decide what to share and with whom
 4. **Audit logging**: All safety-critical actions are logged
 5. **Secure storage**: Sensitive data encrypted at rest
+6. **Transparent cloud AI boundary**: If the AI coordinator is configured with an API key, context is sent to the configured LLM provider
 
 Thank you for helping keep Ailert users safe.

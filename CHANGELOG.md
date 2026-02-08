@@ -18,12 +18,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Audit logging system
 - Settings and onboarding UI
 - Incident history and reporting
+- AI coordinator dashboard transcript entries for sensor observations and candidate actions
+- Live incident context syncing between incident session and AI coordinator
+- Expanded coordinator status feed labels and transcript capacity
+
+### Changed
+- Improved AI coordinator decision parsing for fenced JSON and normalized action names
+- Updated README and security docs to reflect on-device-first processing with optional cloud LLM coordinator
+- Corrected repository clone URL in README
 
 ### Security
-- On-device AI processing (no cloud upload)
+- On-device-first processing for core safety workflows
 - Coarse location option for privacy
 - Anti-doxxing data sanitization
 - Tamper-evident audit logs
+- Clarified optional cloud LLM boundary for AI coordinator usage
 
 ## [1.0.0] - TBD
 
