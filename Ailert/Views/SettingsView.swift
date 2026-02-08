@@ -115,6 +115,42 @@ struct SettingsView: View {
                     Text("Recording")
                 }
                 
+                // AI Coordinator
+                Section {
+                    Toggle(isOn: Binding(
+                        get: { UserDefaults.standard.bool(forKey: "llmCoordinatorEnabled") },
+                        set: { UserDefaults.standard.set($0, forKey: "llmCoordinatorEnabled") }
+                    )) {
+                        HStack {
+                            Image(systemName: "brain.head.profile")
+                                .foregroundColor(.purple)
+                            Text("AI Coordinator")
+                        }
+                    }
+                    
+                    NavigationLink {
+                        APIKeySetupView()
+                    } label: {
+                        HStack {
+                            Image(systemName: "key.fill")
+                                .foregroundColor(.orange)
+                            Text("OpenAI API Key")
+                            Spacer()
+                            if UserDefaults.standard.string(forKey: "openai_api_key")?.isEmpty == false {
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundColor(.green)
+                            } else {
+                                Text("Not Set")
+                                    .foregroundColor(.secondary)
+                            }
+                        }
+                    }
+                } header: {
+                    Text("AI Coordinator")
+                } footer: {
+                    Text("AI analyzes your situation during emergencies and can automatically share location, notify contacts, or recommend calling 911 based on confidence level")
+                }
+                
                 // Security
                 Section {
                     NavigationLink {
@@ -510,6 +546,95 @@ struct PINSetupView: View {
             settingsManager.cancelPIN = cancelPIN
             settingsManager.duressPIN = duressPIN
             settingsManager.savePINs()
+        }
+    }
+}
+
+// MARK: - API Key Setup View
+
+struct APIKeySetupView: View {
+    @State private var apiKey: String = ""
+    @State private var showKey = false
+    @State private var saved = false
+    @Environment(\.dismiss) private var dismiss
+    
+    var body: some View {
+        Form {
+            Section {
+                HStack {
+                    if showKey {
+                        TextField("sk-proj-...", text: $apiKey)
+                            .font(.system(.body, design: .monospaced))
+                            .autocapitalization(.none)
+                            .autocorrectionDisabled()
+                    } else {
+                        SecureField("sk-proj-...", text: $apiKey)
+                            .font(.system(.body, design: .monospaced))
+                            .autocapitalization(.none)
+                            .autocorrectionDisabled()
+                    }
+                    
+                    Button {
+                        showKey.toggle()
+                    } label: {
+                        Image(systemName: showKey ? "eye.slash" : "eye")
+                            .foregroundColor(.secondary)
+                    }
+                }
+            } header: {
+                Text("OpenAI API Key")
+            } footer: {
+                Text("Your key is stored securely on this device only. Get your key from platform.openai.com")
+            }
+            
+            Section {
+                Button {
+                    UserDefaults.standard.set(apiKey, forKey: "openai_api_key")
+                    saved = true
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                        dismiss()
+                    }
+                } label: {
+                    HStack {
+                        Spacer()
+                        if saved {
+                            Label("Saved!", systemImage: "checkmark.circle.fill")
+                                .foregroundColor(.green)
+                        } else {
+                            Text("Save API Key")
+                        }
+                        Spacer()
+                    }
+                }
+                .disabled(apiKey.isEmpty)
+                
+                if !apiKey.isEmpty {
+                    Button(role: .destructive) {
+                        apiKey = ""
+                        UserDefaults.standard.removeObject(forKey: "openai_api_key")
+                    } label: {
+                        HStack {
+                            Spacer()
+                            Text("Clear API Key")
+                            Spacer()
+                        }
+                    }
+                }
+            }
+            
+            Section {
+                Link(destination: URL(string: "https://platform.openai.com/api-keys")!) {
+                    HStack {
+                        Image(systemName: "arrow.up.right.square")
+                        Text("Get API Key from OpenAI")
+                        Spacer()
+                    }
+                }
+            }
+        }
+        .navigationTitle("API Key")
+        .onAppear {
+            apiKey = UserDefaults.standard.string(forKey: "openai_api_key") ?? ""
         }
     }
 }
