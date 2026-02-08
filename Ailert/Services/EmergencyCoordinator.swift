@@ -21,13 +21,14 @@ class EmergencyCoordinator: ObservableObject {
     
     private let llmService: LLMService
     private let speechService: SpeechTranscriptionService
+    private let voiceAssistant: VoiceAssistantService
     private weak var sensorEngine: SensorFusionEngine?
     private weak var escalationEngine: EscalationEngine?
     private weak var classifier: EmergencyClassifier?
     
     // MARK: - Configuration
     
-    private let updateInterval: TimeInterval = 10  // Seconds between LLM updates
+    private let updateInterval: TimeInterval = 5  // Faster updates for voice interaction
     private let chatTemperature: Double = 0.2
     private var currentIncident: Incident?
     private var updateTimer: Timer?
@@ -43,15 +44,20 @@ class EmergencyCoordinator: ObservableObject {
     init(
         llmService: LLMService = .shared,
         speechService: SpeechTranscriptionService = .shared,
+        voiceAssistant: VoiceAssistantService = .shared,
         sensorEngine: SensorFusionEngine? = nil,
         escalationEngine: EscalationEngine? = nil,
         classifier: EmergencyClassifier? = nil
     ) {
         self.llmService = llmService
         self.speechService = speechService
+        self.voiceAssistant = voiceAssistant
         self.sensorEngine = sensorEngine
         self.escalationEngine = escalationEngine
         self.classifier = classifier
+        
+        // Set self as delegate for voice input
+        voiceAssistant.delegate = self
     }
     
     // MARK: - Start/Stop Coordination
@@ -75,21 +81,23 @@ class EmergencyCoordinator: ObservableObject {
         
         addTranscriptEntry(
             type: .observation,
-            content: "Emergency Coordinator activated. Monitoring sensors and listening to audio..."
+            content: "Emergency Coordinator activated. I'm listening..."
         )
         
-        // Start live speech transcription
+        // Start voice assistant (listening + speaking)
         do {
-            try speechService.startTranscribing()
+            try voiceAssistant.startListening()
             addTranscriptEntry(
                 type: .observation,
-                content: "Live audio transcription active"
+                content: "Voice assistant active - I can hear and talk to you"
             )
         } catch {
             addTranscriptEntry(
                 type: .error,
-                content: "Speech transcription unavailable: \(error.localizedDescription)"
+                content: "Voice unavailable: \(error.localizedDescription). Using text mode."
             )
+            // Fall back to text transcription only
+            try? speechService.startTranscribing()
         }
         
         // Subscribe to sensor updates
@@ -104,11 +112,16 @@ class EmergencyCoordinator: ObservableObject {
         updateTimer = nil
         cancellables.removeAll()
         
-        // Stop speech transcription
+        // Stop voice assistant
+        voiceAssistant.stopListening()
+        voiceAssistant.clearConversation()
+        
+        // Stop speech transcription (fallback)
         speechService.stopTranscribing()
         speechService.clearTranscripts()
         
         if state.isActive {
+            voiceAssistant.speak("Emergency session ended. Stay safe.")
             addTranscriptEntry(
                 type: .observation,
                 content: "Emergency Coordinator deactivated"
@@ -881,4 +894,20 @@ class EmergencyCoordinator: ObservableObject {
 extension Notification.Name {
     static let llmRequestLocationSharing = Notification.Name("llmRequestLocationSharing")
     static let llmRequestEvidence = Notification.Name("llmRequestEvidence")
+}
+
+// MARK: - VoiceAssistantDelegate
+
+extension EmergencyCoordinator: VoiceAssistantDelegate {
+    func voiceAssistant(_ assistant: VoiceAssistantService, didReceiveUserSpeech text: String) {
+        // Process the user's spoken message through the LLM
+        Task {
+            await processUserMessage(text)
+            
+            // Speak the response if available
+            if let lastEntry = transcript.last(where: { $0.type == .assistant }) {
+                assistant.speak(lastEntry.content)
+            }
+        }
+    }
 }

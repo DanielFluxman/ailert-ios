@@ -43,6 +43,7 @@
 		00000034 /* EmergencyCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000034 /* EmergencyCoordinator.swift */; };
 		00000035 /* CoordinatorStatusView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000035 /* CoordinatorStatusView.swift */; };
 		00000036 /* SpeechTranscriptionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000036 /* SpeechTranscriptionService.swift */; };
+		00000037 /* VoiceAssistantService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 10000037 /* VoiceAssistantService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -82,6 +83,7 @@
 		10000034 /* EmergencyCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EmergencyCoordinator.swift; sourceTree = "<group>"; };
 		10000035 /* CoordinatorStatusView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoordinatorStatusView.swift; sourceTree = "<group>"; };
 		10000036 /* SpeechTranscriptionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeechTranscriptionService.swift; sourceTree = "<group>"; };
+		10000037 /* VoiceAssistantService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoiceAssistantService.swift; sourceTree = "<group>"; };
 		10000099 /* Ailert.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Ailert.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		10000100 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -149,6 +151,7 @@
 				10000033 /* LLMContextBuilder.swift */,
 				10000034 /* EmergencyCoordinator.swift */,
 				10000036 /* SpeechTranscriptionService.swift */,
+				10000037 /* VoiceAssistantService.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -309,6 +312,7 @@
 				00000034 /* EmergencyCoordinator.swift in Sources */,
 				00000035 /* CoordinatorStatusView.swift in Sources */,
 				00000036 /* SpeechTranscriptionService.swift in Sources */,
+				00000037 /* VoiceAssistantService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
